@@ -3,6 +3,8 @@ package com.unitins.springneo4j.model;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 
+import java.util.Objects;
+
 @Node
 public class Professor {
 
@@ -33,5 +35,18 @@ public class Professor {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Professor professor = (Professor) o;
+        return Objects.equals(id, professor.id) && Objects.equals(codigo, professor.codigo) && Objects.equals(nome, professor.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, codigo, nome);
     }
 }

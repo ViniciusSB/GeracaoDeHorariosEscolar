@@ -1,14 +1,11 @@
 package com.unitins.springneo4j.service;
 
 import com.unitins.springneo4j.model.Disciplina;
-import com.unitins.springneo4j.model.Professor;
-import com.unitins.springneo4j.repository.ProfessorRepository;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import util.Autorizacao;
+import com.unitins.springneo4j.util.Autorizacao;
 
 import java.util.ArrayList;
 import java.util.List;

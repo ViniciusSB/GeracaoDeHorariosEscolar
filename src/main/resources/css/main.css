@@ -69,7 +69,7 @@ footer{
     }
 }
 
-input[type="text"] {
+.inputPesquisa {
     width: 35%;
     border: 2px solid #aaa;
     border-radius: 4px;
@@ -80,7 +80,7 @@ input[type="text"] {
     transition: 0.3s;
 }
 
-input[type="text"]:focus {
+.inputPesquisa:focus {
     border-color: dodgerBlue;
     box-shadow: 0 0 8px 0 dodgerBlue;
 }

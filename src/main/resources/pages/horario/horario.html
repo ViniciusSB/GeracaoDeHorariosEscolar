@@ -10,34 +10,41 @@
     <link rel="stylesheet" href="../../css/button.css">
     <link rel="stylesheet" href="../../css/records.css">
     <link rel="stylesheet" href="../../css/modal.css">
-    <script src="../../javascript/professor/professor.js" defer></script>
-    <title>Professor</title>
+    <script src="../../javascript/horario/horario.js"></script>
+    <title>Horario</title>
 </head>
 <body>
     <header>
-        <h1 class="header-title">Professor</h1>
+        <h1 class="header-title">Horario</h1>
     </header>
+
     <main id="main">
-        <button type="button" class="button blue mobile" id="cadastrarProfessor">Cadastrar Professor</button>
-        <input type="text" placeholder="Pesquisar por nome" id="inputPesquisar">
+        <button type="button" class="button blue mobile" id="cadastrarHorario">Cadastrar Horario</button>
+        <input type="text" id="inputPesquisar" placeholder="Pesquisar por descrição">
         <table class="records" id="tabela">
             <tr>
                 <th hidden>Id</th>
-                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Inicio</th>
+                <th>Fim</th>
+                <th>Ordem</th>
                 <th>Ação</th>
             </tr>
 
 
         </table>
-        <div class="modal" id="modalTurma">
+        <div class="modal" id="modal">
             <div class="modal-content">
                 <header class="modal-header">
-                    <h2>Novo Professor</h2>
+                    <h2>Novo Horario</h2>
                     <span class="modal-close" id="modalClose">&#10006;</span>
                 </header>
                 <form class="modal-form" id="formModal">
                     <input type="hidden" id="inputId">
-                    <input type="text" class="modal-field" id="inputNome" required placeholder="Nome do Professor">
+                    <input type="text" class="modal-field" id="inputDescricao" required placeholder="Descrição do Horario">
+                    <input type="number" class="modal-field" id="inputInicio" required placeholder="Horario de inicio">
+                    <input type="number" class="modal-field" id="inputFim" required placeholder="Horario de finalização">
+                    <input type="number" class="modal-field" id="inputOrdem" required placeholder="Ordem">
                 </form>
                 <footer class="modal-footer">
                     <button class="button blue" id="btnCancelar">Cancelar</button>

@@ -1,7 +1,6 @@
 package com.unitins.springneo4j.service;
 
 import com.unitins.springneo4j.model.Professor;
-import com.unitins.springneo4j.repository.ProfessorRepository;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -18,9 +17,6 @@ import java.util.Map;
 
 @Service
 public class ProfessorService {
-
-    @Autowired
-    ProfessorRepository repository;
 
     Autorizacao autorizacao = new Autorizacao();
 
@@ -111,6 +107,27 @@ public class ProfessorService {
             session.run(query, parametros);
             autorizacao.retornarAutorizacao().close();
             session.close();
+        }
+    }
+
+    public List<Professor> searchByName(String nome) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            Map<String, Object> parametros = new HashMap<>();
+            parametros.put("nome", nome);
+            String query = "MATCH (p:Professor) WHERE p.nome contains '"+nome+"' return p;";
+            Result result = session.run(query, parametros);
+            List<Record> record = result.list();
+            List<Professor> professores = new ArrayList<>();
+            for (Record r: record) {
+                Professor p = new Professor();
+                p.setId(r.get(0).asNode().id());
+                p.setNome(r.get(0).asNode().get("nome").toString().substring(1, r.get(0).asNode().get("nome").toString().length() -1));
+                p.setCodigo(Long.parseLong(r.get(0).asNode().get("codigo").toString()));
+                professores.add(p);
+            }
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+            return professores;
         }
     }
 }

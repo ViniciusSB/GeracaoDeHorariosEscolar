@@ -24,6 +24,16 @@ public class ProfessorController implements WebMvcConfigurer {
         return service.getAll();
     }
 
+    @GetMapping("/{id}")
+    public Professor pesquisarProfessorPorId(@PathVariable Long id) {
+        return service.getById(id);
+    }
+
+    @GetMapping("/pesquisar/{nome}")
+    public List<Professor> pesquisarProfessorPorNome(@PathVariable String nome) {
+        return service.searchByName(nome);
+    }
+
     @PostMapping()
     public void cadastrarProfessor(@RequestBody ObjectNode objectNode) {
         service.insert(objectNode.get("nome").asText());
@@ -35,11 +45,6 @@ public class ProfessorController implements WebMvcConfigurer {
         p.setNome(objectNode.get("nome").asText());
         p.setCodigo(objectNode.get("codigo").asLong());
         service.update(p);
-    }
-
-    @GetMapping("/{id}")
-    public Professor updateProfessor(@PathVariable Long id) {
-        return service.getById(id);
     }
 
     @DeleteMapping("/{id}")

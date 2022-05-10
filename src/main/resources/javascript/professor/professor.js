@@ -16,6 +16,13 @@ document.getElementById('btnCancelar').addEventListener('click', closeModal);
 
 document.getElementById('btnSalvar').addEventListener('click', cadastrarProfessor);
 
+document.getElementById("inputPesquisar").addEventListener('input', (e) => {
+    if (e.currentTarget.value == "") {
+        updateTabela();
+    } else {
+        pesquisarProfessor(e.currentTarget.value);
+    }
+})
 
 function limparCampos() {
     let nome = document.getElementById("inputNome");
@@ -161,6 +168,24 @@ function excluirRegistro(codigo) {
             console.log(err);
         })
     }
+}
+
+function pesquisarProfessor(campo) {
+    let url = `http://localhost:8080/professores/pesquisar/${campo}`;
+    fetch(url, {
+        method: "GET",
+        headers: {'Content-Type': 'application/json'},
+    }).then(function (response) {
+        response.text().then(function (result) {
+            let dados = JSON.parse(result);
+            console.log(dados);
+            deletarTabela();
+            criarTabela();
+            addProfessoresTabela(dados);
+        })
+    }).catch(function (err) {
+        console.log(err);
+    })
 }
 
 updateTabela();

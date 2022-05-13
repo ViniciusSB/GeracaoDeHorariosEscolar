@@ -2,6 +2,10 @@ package com.unitins.springneo4j.model;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
+
+import java.util.List;
+
 @Node
 public class Turma {
 
@@ -9,6 +13,9 @@ public class Turma {
     private Long id;
     private Long codigo;
     private String nome;
+
+    @Relationship(type = "TurmaDisciplina", direction = Relationship.Direction.OUTGOING)
+    private List<Disciplina> disciplinas;
 
     public Long getId() {
         return id;

@@ -2,8 +2,9 @@ package com.unitins.springneo4j.model;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
-import java.util.Objects;
+import java.util.List;
 
 @Node
 public class Professor {
@@ -12,6 +13,9 @@ public class Professor {
     private Long id;
     private Long codigo;
     private String nome;
+
+    @Relationship(type = "ProfessorDisciplina", direction = Relationship.Direction.OUTGOING)
+    private List<Disciplina> disciplinas;
 
     public Long getId() {
         return id;
@@ -37,16 +41,11 @@ public class Professor {
         this.nome = nome;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Professor professor = (Professor) o;
-        return Objects.equals(id, professor.id) && Objects.equals(codigo, professor.codigo) && Objects.equals(nome, professor.nome);
+    public List<Disciplina> getDisciplinas() {
+        return disciplinas;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, codigo, nome);
+    public void setDisciplinas(List<Disciplina> disciplinas) {
+        this.disciplinas = disciplinas;
     }
 }

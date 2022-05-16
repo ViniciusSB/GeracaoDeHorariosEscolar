@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="../../css/modal.css">
     <link rel="stylesheet" href="../../css/menuBar.css">
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-    <script src="../../javascript/turma/turma.js"></script>
-    <title>Turma</title>
+    <script src="../../javascript/turma/adicionarDisciplina.js"></script>
+    <title>Adicionar disciplina</title>
 </head>
 <body>
 
@@ -69,13 +69,17 @@
 
 <!--    Titulo-->
 <header>
-    <h1 class="header-title">Turma</h1>
+    <h1 class="header-title">Turma - adicionar disciplina</h1>
 </header>
 
 <!--    Tabela-->
 <main id="main">
-    <button type="button" class="button blue mobile" id="cadastrarTurma">Cadastrar Turma</button>
-    <input type="text" id="inputPesquisar" class="inputPesquisa" placeholder="Pesquisar por nome">
+
+    <label for="selectTurma">Selecione uma turma:</label>
+    <select id="selectTurma">
+
+    </select>
+
     <table class="records" id="tabela">
         <tr>
             <th hidden>Id</th>
@@ -85,23 +89,7 @@
 
     </table>
 
-    <!--        Modal-->
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <header class="modal-header">
-                <h2>Nova Turma</h2>
-                <span class="modal-close" id="modalClose">&#10006;</span>
-            </header>
-            <form class="modal-form" id="formModal">
-                <input type="hidden" id="inputId">
-                <input type="text" class="modal-field" id="inputNome" required placeholder="Nome da Turma">
-            </form>
-            <footer class="modal-footer">
-                <button class="button blue" id="btnCancelar">Cancelar</button>
-                <button class="button green" id="btnSalvar">Salvar</button>
-            </footer>
-        </div>
-    </div>
+
 </main>
 
 <!--    Footer-->

@@ -64,7 +64,7 @@ nav ul li:hover > ul{
 nav ul ul li{
     position: relative;
     margin: 0px;
-    width: max-content;
+    width: 210px;
     float: none;
     display: list-item;
     border-bottom: 1px solid rgba(0,0,0,0.3);
@@ -75,7 +75,7 @@ nav ul ul li a{
 nav ul ul ul li{
     position: relative;
     top: -60px;
-    left: 150px;
+    left: 210px;
 }
 .show,.icon,input[type=checkbox]{
     display: none;

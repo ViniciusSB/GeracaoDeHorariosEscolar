@@ -189,7 +189,7 @@ function excluirRegistro(codigo) {
 }
 
 function pesquisarHorario(campo) {
-    let url = `http://localhost:8080/horarios/pesquisar/${campo}`
+    let url = `http://localhost:8080/horarios/pesquisar?nome=${campo}`;
     fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},

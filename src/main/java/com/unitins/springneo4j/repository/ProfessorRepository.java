@@ -93,7 +93,7 @@ public class ProfessorRepository {
 
     public List<Record> buscarPorNome(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (p:Professor) WHERE p.nome contains '"+parametros.get("nome").toString()+"' return p;";
+            String query = "MATCH (p:Professor) WHERE toLower(p.nome) contains '"+parametros.get("nome").toString().toLowerCase()+"' return p;";
             Result result = session.run(query, parametros);
             List<Record> records = result.list();
             autorizacao.retornarAutorizacao().close();

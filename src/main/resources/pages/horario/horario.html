@@ -10,14 +10,68 @@
     <link rel="stylesheet" href="../../css/button.css">
     <link rel="stylesheet" href="../../css/records.css">
     <link rel="stylesheet" href="../../css/modal.css">
+    <link rel="stylesheet" href="../../css/menuBar.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script src="../../javascript/horario/horario.js"></script>
     <title>Horario</title>
 </head>
 <body>
+
+<!--    Menu Superior-->
+    <nav id="navMenuBar">
+        <label for="btn" class="icon">
+            <span class="fa fa-bars"></span>
+        </label>
+        <input type="checkbox" id="btn">
+        <ul>
+            <li>
+                <label for="btn-1" class="show">Features +</label>
+                <a href="../turma/turma.html">Turma</a>
+                <input type="checkbox" id="btn-0">
+                <ul>
+                    <li><a href="#">Adicionar Disciplina</a></li>
+                    <li><a href="#">Desvincular</a></li>
+                </ul>
+            </li>
+            <li>
+                <label for="btn-1" class="show">Features +</label>
+                <a href="../disciplina/disciplina.html">Disciplina</a>
+                <input type="checkbox" id="btn-1">
+                <ul>
+                    <li><a href="#">Pages</a></li>
+                    <li><a href="#">Elements</a></li>
+                    <li><a href="#">Icons</a></li>
+                </ul>
+            </li>
+            <li>
+                <label for="btn-2" class="show">Services +</label>
+                <a href="../professor/professor.html">Professor</a>
+                <input type="checkbox" id="btn-2">
+                <ul>
+                    <li><a href="#">Web Design</a></li>
+                    <li><a href="#">App Design</a></li>
+                    <li>
+                        <label for="btn-3" class="show">More +</label>
+                        <a href="#">More <span class="fa fa-plus"></span></a>
+                        <input type="checkbox" id="btn-3">
+                        <ul>
+                            <li><a href="#">Submenu-1</a></li>
+                            <li><a href="#">Submenu-2</a></li>
+                            <li><a href="#">Submenu-3</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li><a href="../horario/horario.html">Horario</a></li>
+        </ul>
+    </nav>
+
+<!--    Titulo-->
     <header>
         <h1 class="header-title">Horario</h1>
     </header>
 
+<!--    Tabela-->
     <main id="main">
         <button type="button" class="button blue mobile" id="cadastrarHorario">Cadastrar Horario</button>
         <input type="text" id="inputPesquisar" class="inputPesquisa" placeholder="Pesquisar por descrição">
@@ -33,6 +87,8 @@
 
 
         </table>
+
+<!--        Modal-->
         <div class="modal" id="modal">
             <div class="modal-content">
                 <header class="modal-header">
@@ -53,6 +109,8 @@
             </div>
         </div>
     </main>
+
+<!--    Footer-->
     <footer>
         Vinícius SB
     </footer>

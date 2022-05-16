@@ -183,7 +183,7 @@ function excluirRegistro(codigo) {
 }
 
 function pesquisarDisciplina(campo) {
-    let url = `http://localhost:8080/disciplinas/pesquisar/${campo}`
+    let url = `http://localhost:8080/disciplinas/pesquisar?nome=${campo}`;
     fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},

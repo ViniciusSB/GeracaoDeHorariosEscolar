@@ -8,21 +8,27 @@ const closeModal = () => {
     document.getElementById('modal').classList.remove('active');
 }
 
-document.getElementById('cadastrarProfessor').addEventListener('click', openModal);
+window.onload=function(){
+    document.getElementById('cadastrarProfessor').addEventListener('click', openModal);
 
-document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
 
-document.getElementById('btnCancelar').addEventListener('click', closeModal);
+    document.getElementById('btnCancelar').addEventListener('click', closeModal);
 
-document.getElementById('btnSalvar').addEventListener('click', cadastrarProfessor);
+    document.getElementById('btnSalvar').addEventListener('click', cadastrarProfessor);
 
-document.getElementById("inputPesquisar").addEventListener('input', (e) => {
-    if (e.currentTarget.value == "") {
-        updateTabela();
-    } else {
-        pesquisarProfessor(e.currentTarget.value);
-    }
-})
+    document.getElementById("inputPesquisar").addEventListener('input', (e) => {
+        if (e.currentTarget.value == "") {
+            updateTabela();
+        } else {
+            pesquisarProfessor(e.currentTarget.value);
+        }
+    })
+
+    updateTabela();
+}
+
+
 
 function limparCampos() {
     let nome = document.getElementById("inputNome");
@@ -171,7 +177,7 @@ function excluirRegistro(codigo) {
 }
 
 function pesquisarProfessor(campo) {
-    let url = `http://localhost:8080/professores/pesquisar/${campo}`;
+    let url = `http://localhost:8080/professores/pesquisar?nome=${campo}`;
     fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},
@@ -187,5 +193,3 @@ function pesquisarProfessor(campo) {
         console.log(err);
     })
 }
-
-updateTabela();

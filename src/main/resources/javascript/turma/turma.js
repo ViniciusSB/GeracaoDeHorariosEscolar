@@ -172,7 +172,7 @@ function excluirRegistro(codigo) {
 }
 
 function pesquisarTurma(campo) {
-    let url = `http://localhost:8080/turmas/pesquisar/${campo}`
+    let url = `http://localhost:8080/turmas/pesquisar?nome=${campo}`
     fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},

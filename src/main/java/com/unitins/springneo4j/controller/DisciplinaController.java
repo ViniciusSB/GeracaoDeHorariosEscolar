@@ -28,8 +28,8 @@ public class DisciplinaController implements WebMvcConfigurer {
         return service.getById(id);
     }
 
-    @GetMapping("/pesquisar/{nome}")
-    public List<Disciplina> pesquisarDisciplinaPorNome(@PathVariable String nome) {
+    @GetMapping("/pesquisar")
+    public List<Disciplina> pesquisarDisciplinaPorNome(@RequestParam String nome) {
         return service.searchByName(nome);
     }
 

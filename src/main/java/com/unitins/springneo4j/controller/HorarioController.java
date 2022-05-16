@@ -30,8 +30,8 @@ public class HorarioController implements WebMvcConfigurer {
         return service.getById(id);
     }
 
-    @GetMapping("/pesquisar/{nome}")
-    public List<Horario> pesquisarHorarioPorNome(@PathVariable String nome) {
+    @GetMapping("/pesquisar")
+    public List<Horario> pesquisarHorarioPorNome(@RequestParam String nome) {
         return service.searchByName(nome);
     }
 

@@ -1,7 +1,7 @@
 package com.unitins.springneo4j.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.unitins.springneo4j.model.Professor;
+import com.unitins.springneo4j.model.Disciplina;
 import com.unitins.springneo4j.model.Turma;
 import com.unitins.springneo4j.service.ProfessorService;
 import com.unitins.springneo4j.service.TurmaService;
@@ -29,6 +29,12 @@ public class TurmaController implements WebMvcConfigurer {
         return service.getById(id);
     }
 
+    @GetMapping("/{id}/disciplinas")
+    public List<Disciplina> pesquisarTurmaDisciplinaById(@PathVariable Long id) {
+        return service.disciplinasTurmaByIdTurma(id);
+    }
+
+
     @RequestMapping(value = "pesquisar", method = RequestMethod.GET)
     public List<Turma> pesquisarTurmaPorNome(@RequestParam String nome) {
         return service.searchByName(nome);
@@ -50,6 +56,11 @@ public class TurmaController implements WebMvcConfigurer {
     @DeleteMapping("/{id}")
     public void deletarTurma(@PathVariable Long id) {
         service.deleteById(id);
+    }
+
+    @DeleteMapping("/disciplina/{codigoDisciplina}")
+    public void deletarRelacionamentoDisciplinaTurma(@PathVariable Long codigoDisciplina) {
+        service.deleteRelationShipDisciplinaTurma(codigoDisciplina);
     }
 
     @Override

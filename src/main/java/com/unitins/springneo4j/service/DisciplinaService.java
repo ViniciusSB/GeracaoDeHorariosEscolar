@@ -1,122 +1,67 @@
 package com.unitins.springneo4j.service;
 
 import com.unitins.springneo4j.model.Disciplina;
-import com.unitins.springneo4j.model.Horario;
+import com.unitins.springneo4j.repository.DisciplinaRepository;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.exceptions.NoSuchRecordException;
 import org.springframework.stereotype.Service;
-import com.unitins.springneo4j.util.Autorizacao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class DisciplinaService {
 
-    Autorizacao autorizacao = new Autorizacao();
+    DisciplinaRepository repository = new DisciplinaRepository();
 
     public List<Disciplina> getAll() {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (d:Disciplina) RETURN d ORDER BY d.codigo ASC";
-            Result result = session.run(query);
-            List<Record> records = result.list();
-            List<Disciplina> disciplinas = recordToDisciplinas(records);
-            return disciplinas;
-        }
+        List<Record> records = repository.buscarTodos();
+        return recordToDisciplinas(records);
     }
 
     public void insert(Disciplina disciplina) {
-
         Integer codigo = retornarMaiorCodigo();
 
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-
-            Map<String, Object> parametros = new HashMap<>();
-            parametros.put("codigo", codigo);
-            parametros.put("nome", disciplina.getNome());
-            parametros.put("aulasemanal", disciplina.getAulaSemanal());
-            parametros.put("ch", disciplina.getCargaHoraria());
-
-            String query = "CREATE (d:Disciplina {codigo: $codigo, nome: $nome, ch: $ch, aulasemanal: $aulasemanal})";
-            Result result = session.run(query, parametros);
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-        }
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigo", codigo);
+        parametros.put("nome", disciplina.getNome());
+        parametros.put("aulasemanal", disciplina.getAulaSemanal());
+        parametros.put("ch", disciplina.getCargaHoraria());
+        repository.inserir(parametros);
     }
 
     public Integer retornarMaiorCodigo() {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (d:Disciplina) RETURN d ORDER BY d.codigo DESC LIMIT 1";
-            Result result = session.run(query);
-            try {
-                Record record = result.single();
-                autorizacao.retornarAutorizacao().close();
-                session.close();
-                return Integer.parseInt(record.get(0).asNode().get("codigo").toString()) + 1;
-            } catch (NoSuchRecordException err) {
-                return 1;
-            }
-        }
+        return repository.retornarMaiorCodigo();
     }
 
     public Disciplina getById(Long codigo) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            Map<String, Object> parametros = new HashMap<>();
-            parametros.put("codigo", codigo);
-            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigo RETURN d";
-            Result result = session.run(query, parametros);
-            Record record = result.single();
-            Disciplina d = recordToDisciplina(record);
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigo", codigo);
 
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-            return d;
-        }
+        Record record = repository.buscarPorId(parametros);
+        return recordToDisciplina(record);
     }
 
     public void deleteById(Long codigo) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            Map<String, Object> parametros = new HashMap<>();
-            parametros.put("codigo", codigo);
-            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigo DETACH DELETE d;";
-            Result result = session.run(query, parametros);
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-        }
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigo", codigo);
+        repository.deletarPorId(parametros);
     }
 
     public void update(Disciplina disciplina) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            Map<String, Object> parametros = new HashMap<>();
-            parametros.put("nome", disciplina.getNome());
-            parametros.put("codigo", disciplina.getCodigo());
-            parametros.put("aulasemanal", disciplina.getAulaSemanal());
-            parametros.put("ch", disciplina.getCargaHoraria());
-
-            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigo SET d.nome = $nome, d.ch = $ch, d.aulasemanal = $aulasemanal;";
-            session.run(query, parametros);
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-        }
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("nome", disciplina.getNome());
+        parametros.put("codigo", disciplina.getCodigo());
+        parametros.put("aulasemanal", disciplina.getAulaSemanal());
+        parametros.put("ch", disciplina.getCargaHoraria());
+        repository.update(parametros);
     }
 
     public List<Disciplina> searchByName(String nome) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            Map<String, Object> parametros = new HashMap<>();
-            parametros.put("nome", nome);
-            String query = "MATCH (d:Disciplina) WHERE d.nome contains '"+nome+"' return d;";
-            Result result = session.run(query, parametros);
-            List<Record> r = result.list();
-            List<Disciplina> disciplinas = new ArrayList<>();
-
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-            return disciplinas;
-        }
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("nome", nome);
+        List<Record> records = repository.buscarPorNome(parametros);
+        return recordToDisciplinas(records);
     }
 
     public List<Disciplina> recordToDisciplinas(List<Record> r) {

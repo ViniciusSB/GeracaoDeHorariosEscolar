@@ -9,13 +9,13 @@ import org.neo4j.driver.exceptions.NoSuchRecordException;
 import java.util.HashMap;
 import java.util.List;
 
-public class TurmaRepository {
+public class DisciplinaRepository {
 
     Autorizacao autorizacao = new Autorizacao();
 
     public List<Record> buscarTodos() {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) RETURN t ORDER BY t.codigo ASC";
+            String query = "MATCH (d:Disciplina) RETURN d ORDER BY d.codigo ASC";
             Result result = session.run(query);
             List<Record> records = result.list();
             autorizacao.retornarAutorizacao().close();
@@ -26,7 +26,7 @@ public class TurmaRepository {
 
     public void inserir(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "CREATE (t:Turma {codigo: $codigo, nome: $nome})";
+            String query = "CREATE (d:Disciplina {codigo: $codigo, nome: $nome, ch: $ch, aulasemanal: $aulasemanal})";
             Result result = session.run(query, parametros);
             autorizacao.retornarAutorizacao().close();
             session.close();
@@ -35,7 +35,7 @@ public class TurmaRepository {
 
     public Integer retornarMaiorCodigo() {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) RETURN t ORDER BY t.codigo DESC LIMIT 1";
+            String query = "MATCH (d:Disciplina) RETURN d ORDER BY d.codigo DESC LIMIT 1";
             Result result = session.run(query);
             try {
                 Record record = result.single();
@@ -50,9 +50,10 @@ public class TurmaRepository {
 
     public Record buscarPorId(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) WHERE t.codigo = $codigo RETURN t";
+            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigo RETURN d";
             Result result = session.run(query, parametros);
             Record record = result.single();
+
             autorizacao.retornarAutorizacao().close();
             session.close();
             return record;
@@ -61,25 +62,16 @@ public class TurmaRepository {
 
     public void deletarPorId(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) WHERE t.codigo = $codigo DETACH DELETE t;";
+            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigo DETACH DELETE d;";
             Result result = session.run(query, parametros);
             autorizacao.retornarAutorizacao().close();
             session.close();
         }
     }
 
-    public void deletarRelacionamentoDisciplinaTurma(HashMap<String, Object> parametros) {
+    public void update(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (d:Disciplina)<-[td:TurmaDisciplina]-(t:Turma) WHERE d.codigo = $codigo DETACH DELETE td;";
-            Result result = session.run(query, parametros);
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-        }
-    }
-
-    public void atualizar(HashMap<String, Object> parametros) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) WHERE t.codigo = $codigo SET t.nome = $nome;";
+            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigo SET d.nome = $nome, d.ch = $ch, d.aulasemanal = $aulasemanal;";
             session.run(query, parametros);
             autorizacao.retornarAutorizacao().close();
             session.close();
@@ -88,23 +80,15 @@ public class TurmaRepository {
 
     public List<Record> buscarPorNome(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) WHERE t.nome contains '"+parametros.get("nome").toString()+"' return t;";
+            String query = "MATCH (d:Disciplina) WHERE d.nome contains '"+parametros.get("nome").toString()+"' return d;";
             Result result = session.run(query, parametros);
-            List<Record> records = result.list();
+            List<Record> r = result.list();
             autorizacao.retornarAutorizacao().close();
             session.close();
-            return records;
+            return r;
         }
     }
 
-    public List<Record> buscarDisciplinasPorTurma(HashMap<String, Object> parametros) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma)-[:TurmaDisciplina]->(d:Disciplina) WHERE t.codigo = $codigo return d;";
-            Result result = session.run(query, parametros);
-            List<Record> records = result.list();
-            autorizacao.retornarAutorizacao().close();
-            session.close();
-            return records;
-        }
-    }
+
+
 }

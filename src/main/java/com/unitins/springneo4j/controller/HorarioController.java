@@ -2,10 +2,7 @@ package com.unitins.springneo4j.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.unitins.springneo4j.model.Horario;
-import com.unitins.springneo4j.model.Professor;
-import com.unitins.springneo4j.model.Turma;
 import com.unitins.springneo4j.service.HorarioService;
-import com.unitins.springneo4j.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

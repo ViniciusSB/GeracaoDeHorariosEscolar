@@ -3,17 +3,12 @@ package com.unitins.springneo4j.service;
 import com.unitins.springneo4j.model.Disciplina;
 import com.unitins.springneo4j.model.Turma;
 import com.unitins.springneo4j.repository.TurmaRepository;
-import com.unitins.springneo4j.util.Autorizacao;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.exceptions.NoSuchRecordException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TurmaService {

@@ -1,6 +1,5 @@
 package com.unitins.springneo4j.repository;
 
-import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.util.Autorizacao;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;

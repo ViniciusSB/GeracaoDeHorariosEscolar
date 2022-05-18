@@ -1,19 +1,13 @@
 package com.unitins.springneo4j.service;
 
 import com.unitins.springneo4j.model.Horario;
-import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.repository.HorarioRepository;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.exceptions.NoSuchRecordException;
 import org.springframework.stereotype.Service;
-import com.unitins.springneo4j.util.Autorizacao;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class HorarioService {

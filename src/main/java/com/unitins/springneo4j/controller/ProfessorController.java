@@ -5,11 +5,9 @@ import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.ws.rs.GET;
 import java.util.List;
 
 @RestController

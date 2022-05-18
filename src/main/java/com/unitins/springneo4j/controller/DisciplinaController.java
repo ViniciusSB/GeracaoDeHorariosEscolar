@@ -2,7 +2,6 @@ package com.unitins.springneo4j.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.unitins.springneo4j.model.Disciplina;
-import com.unitins.springneo4j.model.Horario;
 import com.unitins.springneo4j.service.DisciplinaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

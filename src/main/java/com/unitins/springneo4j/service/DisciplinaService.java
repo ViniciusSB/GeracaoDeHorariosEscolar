@@ -19,6 +19,11 @@ public class DisciplinaService {
         return recordToDisciplinas(records);
     }
 
+    public List<Disciplina> getAllWithoutRelationship() {
+        List<Record> records = repository.buscarDisciplinasSemRelacionamento();
+        return recordToDisciplinas(records);
+    }
+
     public void insert(Disciplina disciplina) {
         Integer codigo = retornarMaiorCodigo();
 
@@ -28,6 +33,13 @@ public class DisciplinaService {
         parametros.put("aulasemanal", disciplina.getAulaSemanal());
         parametros.put("ch", disciplina.getCargaHoraria());
         repository.inserir(parametros);
+    }
+
+    public void insertDisciplinaTurma(Integer codigoDisciplina, Integer codigoTurma) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoDisciplina", codigoDisciplina);
+        parametros.put("codigoTurma", codigoTurma);
+        repository.inserirDiscipinaNaTurma(parametros);
     }
 
     public Integer retornarMaiorCodigo() {

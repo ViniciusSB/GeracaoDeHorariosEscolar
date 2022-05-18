@@ -5,6 +5,7 @@ window.onload=function(){
     carregarTurmas();
 
     document.getElementById("selectTurma").addEventListener('change', (e) => {
+        console.log(e.currentTarget.value);
         if (e.currentTarget.value !== "0") {
             updateTabela();
             carregarDisciplinaTurma(e.currentTarget.value);
@@ -12,6 +13,8 @@ window.onload=function(){
             limparCampos()
         }
     })
+
+    document.getElementById('modalClose').addEventListener('click', closeModal);
 }
 
 const openModal = () => document.getElementById('modal')
@@ -19,6 +22,7 @@ const openModal = () => document.getElementById('modal')
 
 const closeModal = () => {
     document.getElementById('modal').classList.remove('active');
+    removerElementosModal();
 }
 
 
@@ -108,6 +112,7 @@ function addBotaoAddDisciplina() {
         botao.id = "adicionarDisciplina";
         botao.textContent = "Adicionar disciplina";
         tabela.parentElement.insertBefore(botao, tabela);
+        botao.addEventListener('click', abrirBtnAddDisciplina);
     }
 }
 
@@ -153,8 +158,114 @@ function updateTabela(){
     deletarTabela();
     criarTabela();
     carregarTurmas();
-
 }
+
+function addElementosNoModal() {
+    let form = document.getElementById("formModal");
+    let label = document.createElement("label");
+    label.id = "labelModel";
+
+    let url = 'http://localhost:8080/disciplinas/semrelacionamento';
+    fetch(url, {
+        method: "GET",
+        headers: {'Content-Type': 'application/json'},
+        mode: "cors"
+    }).then(function (response) {
+        response.text().then(function (result){
+            var disciplinas = JSON.parse(result);
+            console.log(disciplinas);
+        })
+    }).catch(function (err) {
+        console.log(err);
+    })
+
+    let disciplinas = 0;
+
+    if (0 === 0) {
+        label.innerText = "Nenhuma disciplina disponível";
+        form.appendChild(label);
+    } else {
+        label.className = "input-select-custom";
+        label.innerText = "Selecione uma disciplina";
+        form.appendChild(label);
+        let select = document.createElement("select");
+        select.id = "selectDisciplina";
+        label.appendChild(select);
+        let optionNull = document.createElement("option");
+        optionNull.value = "0";
+        optionNull.label = "-----";
+        select.appendChild(optionNull);
+        for (let i=0; i<disciplinas.length; i++) {
+            let option = document.createElement("option");
+            option.value = disciplinas[i].codigo;
+            option.label = disciplinas[i].nome;
+            select.appendChild(option);
+        }
+
+        let botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "button blue mobile";
+        botao.id = "addDisciplinaNaTurma";
+        botao.textContent = "Adicionar disciplina";
+        botao.addEventListener('click', btnAddDisciplinaNaTurma);
+    }
+}
+
+function removerElementosModal() {
+    let label = document.getElementById("labelModel");
+    label.remove();
+}
+
+function abrirBtnAddDisciplina() {
+    addElementosNoModal();
+    openModal();
+}
+
+function btnAddDisciplinaNaTurma() {
+    let disciplina = document.getElementById("selectDisciplina");
+    if (disciplina.value === "0") {
+        alert("Selecione uma disciplina disponível");
+    } else {
+
+    }
+}
+
+function listarDisciplinasSemRelacionamento() {
+    let url = 'http://localhost:8080/disciplinas/semrelacionamento';
+    fetch(url, {
+        method: "GET",
+        headers: {'Content-Type': 'application/json'},
+        mode: "cors"
+    }).then(function (response) {
+        response.text().then(function (result){
+            var disciplinas = JSON.parse(result);
+            console.log(disciplinas);
+        })
+    }).catch(function (err) {
+        console.log(err);
+    })
+}
+
+function adionarDisciplinaNaTurma(idDisciplina, idTurma) {
+    let url = 'http://localhost:8080/disciplinas/disciplinaTurma';
+    let parametros = {
+        "codigoDisciplina": idDisciplina,
+        "codigoTurma": idTurma
+    }
+    fetch(url, {
+        method: "POST",
+        body: JSON.stringify(parametros),
+        headers: {'Content-Type': 'application/json'}
+    }).then(function (response) {
+        response.text().then(function (result) {
+            console.log(JSON.parse(result));
+        })
+    }).catch(function (err) {
+        console.log(err);
+    })
+}
+
+
 
 
 

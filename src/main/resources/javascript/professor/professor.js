@@ -143,9 +143,6 @@ function updateTabela(){
 function editarRegistro(codigo) {
     openModal();
     let url = `http://localhost:8080/professores/${codigo}`;
-    let parametros = {
-        "id": codigo
-    }
     fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},

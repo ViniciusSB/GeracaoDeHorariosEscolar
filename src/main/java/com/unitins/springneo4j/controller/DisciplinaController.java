@@ -32,6 +32,11 @@ public class DisciplinaController implements WebMvcConfigurer {
         return service.searchByName(nome);
     }
 
+    @GetMapping("/semrelacionamento")
+    public List<Disciplina> pesquisarDisciplinaPorNome() {
+        return service.getAllWithoutRelationship();
+    }
+
     @PostMapping()
     public void cadastrarDisciplina(@RequestBody ObjectNode objectNode) {
         Disciplina d = new Disciplina();
@@ -39,6 +44,13 @@ public class DisciplinaController implements WebMvcConfigurer {
         d.setAulaSemanal(objectNode.get("aulasemanal").asInt());
         d.setCargaHoraria(objectNode.get("ch").asInt());
         service.insert(d);
+    }
+
+    @PostMapping("/disciplinaTurma")
+    public void cadastrarDisciplinaNaTurma(@RequestBody ObjectNode objectNode) {
+        Integer codigoDisciplina = objectNode.get("codigoDisciplina").intValue();
+        Integer codigoTurma = objectNode.get("codigoTurma").intValue();
+        service.insertDisciplinaTurma(codigoDisciplina, codigoTurma);
     }
 
     @RequestMapping(method = RequestMethod.PUT)

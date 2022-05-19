@@ -44,10 +44,9 @@ public class DisciplinaRepository {
 
     public void inserirDiscipinaNaTurma(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (d:Disciplina) WHERE d.codigo = $codigoDisciplina " +
-                    "MATCH (t:Turma) WHERE t.codigo = $codigoTurma " +
-                    "CREATE (t)-[:TurmaDisciplina]->(d)";
+            String query = "MATCH (d:Disciplina), (t:Turma) WHERE d.codigo = $codigoDisciplina AND t.codigo = $codigoTurma CREATE (d)<-[td:TurmaDisciplina]-(t) RETURN d,t;";
             Result result = session.run(query, parametros);
+            List<Record> record = result.list();
             autorizacao.retornarAutorizacao().close();
             session.close();
         }

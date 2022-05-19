@@ -5,7 +5,6 @@ window.onload=function(){
     carregarTurmas();
 
     document.getElementById("selectTurma").addEventListener('change', (e) => {
-        console.log(e.currentTarget.value);
         if (e.currentTarget.value !== "0") {
             updateTabela();
             carregarDisciplinaTurma(e.currentTarget.value);
@@ -23,8 +22,10 @@ const openModal = () => document.getElementById('modal')
 const closeModal = () => {
     document.getElementById('modal').classList.remove('active');
     removerElementosModal();
+    deletarTabela();
+    criarTabela();
+    addDisciplinasTabela(document.getElementById("selectTurma").value);
 }
-
 
 function carregarTurmas() {
     fetch("http://localhost:8080/turmas", {
@@ -35,7 +36,6 @@ function carregarTurmas() {
     }).then(function (response) {
         response.text().then(function (result){
             var turmas = JSON.parse(result);
-            console.log(turmas);
             if (document.getElementById("selectTurma").childNodes.length === 3) {
                 addTurmasSelect(turmas);
             }
@@ -77,14 +77,9 @@ function deletarTabela() {
     tabela.remove();
 }
 
-function delay(n){
-    return new Promise(function(resolve){
-        setTimeout(resolve,n*1000);
-    });
-}
-
 function carregarDisciplinaTurma(idTurma) {
     addBotaoAddDisciplina();
+    addInfoTurma();
     addDisciplinasTabela(idTurma);
 }
 
@@ -95,12 +90,31 @@ function addDisciplinasTabela(idTurma) {
     }).then(function (response) {
         response.text().then(function (result){
             let disciplinas = JSON.parse(result);
-            console.log(disciplinas);
             adicionarDisciplinasTabela(disciplinas);
         })
     }).catch(function (err) {
         console.log(err);
     })
+}
+
+function addInfoTurma() {
+    let label = document.createElement("label");
+    let select = document.getElementById("selectTurma");
+    let indiceTurma = select.selectedIndex;
+    let turmaselecionada = select.options[indiceTurma];
+    let nomeTurma = turmaselecionada.label;
+    label.textContent = `Disciplinas associadas a turma ${nomeTurma}`;
+    label.style.cssText = "text-align: center; line-height: 150%; font-size: 15px;";
+    label.id = "infoTurma";
+    let tabela = document.getElementById("tabela");
+    tabela.parentElement.insertBefore(label, tabela);
+}
+
+function deletarInfoTurma() {
+    let label = document.getElementById("infoTurma");
+    if (label !== null) {
+        label.remove();
+    }
 }
 
 function addBotaoAddDisciplina() {
@@ -131,15 +145,12 @@ function adicionarDisciplinasTabela(disciplinas) {
 
 async function excluirDisciplina(codigo) {
     if (window.confirm("Deseja realmente excluir esse registro?") === true) {
-        fetch(`http://localhost:8080/turmas/disciplina/${codigo}`, {
+        await fetch(`http://localhost:8080/turmas/disciplina/${codigo}`, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
-        }).then((response) => {
-            console.log(response.text());
         }).catch(function (err) {
             console.log(err);
         })
-        await delay(0.6);
         updateTabela()
         addDisciplinasTabela(document.getElementById("selectTurma").value);
     }
@@ -156,64 +167,58 @@ function removerBotaoAddDisciplina() {
 
 function updateTabela(){
     deletarTabela();
+    deletarInfoTurma();
     criarTabela();
     carregarTurmas();
 }
 
-function addElementosNoModal() {
-    let form = document.getElementById("formModal");
-    let label = document.createElement("label");
-    label.id = "labelModel";
+async function addElementosNoModal() {
 
-    let url = 'http://localhost:8080/disciplinas/semrelacionamento';
-    fetch(url, {
-        method: "GET",
-        headers: {'Content-Type': 'application/json'},
-        mode: "cors"
-    }).then(function (response) {
-        response.text().then(function (result){
-            var disciplinas = JSON.parse(result);
-            console.log(disciplinas);
-        })
-    }).catch(function (err) {
-        console.log(err);
-    })
-
-    let disciplinas = 0;
-
-    if (0 === 0) {
+    let disciplinas = await listarDisciplinasSemRelacionamento();
+    if (disciplinas.length === 0) {
+        let form = document.getElementById("formModal");
+        let label = document.createElement("label");
+        label.id = "labelModel";
         label.innerText = "Nenhuma disciplina disponível";
         form.appendChild(label);
     } else {
-        label.className = "input-select-custom";
-        label.innerText = "Selecione uma disciplina";
-        form.appendChild(label);
-        let select = document.createElement("select");
-        select.id = "selectDisciplina";
-        label.appendChild(select);
-        let optionNull = document.createElement("option");
-        optionNull.value = "0";
-        optionNull.label = "-----";
-        select.appendChild(optionNull);
-        for (let i=0; i<disciplinas.length; i++) {
-            let option = document.createElement("option");
-            option.value = disciplinas[i].codigo;
-            option.label = disciplinas[i].nome;
-            select.appendChild(option);
-        }
-
-        let botao = document.createElement("button");
-        botao.type = "button";
-        botao.className = "button blue mobile";
-        botao.id = "addDisciplinaNaTurma";
-        botao.textContent = "Adicionar disciplina";
-        botao.addEventListener('click', btnAddDisciplinaNaTurma);
+        addElementosNoLabelModal(disciplinas);
     }
 }
 
+function addElementosNoLabelModal(disciplinas) {
+    let form = document.getElementById("formModal");
+    let label = document.createElement("label");
+    label.id = "labelModel";
+    label.className = "input-select-custom";
+    label.innerText = "Selecione uma disciplina";
+    form.appendChild(label);
+    let select = document.createElement("select");
+    select.id = "selectDisciplina";
+    form.appendChild(select);
+    let optionNull = document.createElement("option");
+    optionNull.value = "0";
+    optionNull.label = "-----";
+    select.appendChild(optionNull);
+    for (let i=0; i<disciplinas.length; i++) {
+        let option = document.createElement("option");
+        option.value = disciplinas[i].codigo;
+        option.label = disciplinas[i].nome;
+        select.appendChild(option);
+    }
+
+    let botao = document.createElement("button");
+    botao.type = "button";
+    botao.className = "button blue mobile";
+    botao.id = "addDisciplinaNaTurma";
+    botao.textContent = "Adicionar";
+    botao.addEventListener('click', btnAddDisciplinaNaTurma);
+    form.appendChild(botao);
+}
+
 function removerElementosModal() {
-    let label = document.getElementById("labelModel");
-    label.remove();
+    let form = document.getElementById("formModal");
+    form.innerHTML = "";
 }
 
 function abrirBtnAddDisciplina() {
@@ -221,48 +226,43 @@ function abrirBtnAddDisciplina() {
     openModal();
 }
 
-function btnAddDisciplinaNaTurma() {
+async function btnAddDisciplinaNaTurma() {
     let disciplina = document.getElementById("selectDisciplina");
-    if (disciplina.value === "0") {
+    let codigoDisciplina = disciplina.value;
+    if (codigoDisciplina === "0") {
         alert("Selecione uma disciplina disponível");
     } else {
-
+        let codigoTurma = document.getElementById("selectTurma");
+        await adionarDisciplinaNaTurma(codigoDisciplina, codigoTurma.value);
+        removerElementosModal();
+        await addElementosNoModal();
     }
 }
 
-function listarDisciplinasSemRelacionamento() {
+async function listarDisciplinasSemRelacionamento() {
     let url = 'http://localhost:8080/disciplinas/semrelacionamento';
-    fetch(url, {
+    let request = await fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},
         mode: "cors"
-    }).then(function (response) {
-        response.text().then(function (result){
-            var disciplinas = JSON.parse(result);
-            console.log(disciplinas);
-        })
-    }).catch(function (err) {
-        console.log(err);
-    })
+    });
+    let response = await request.text();
+    let disciplinas = await JSON.parse(response);
+    return disciplinas;
 }
 
-function adionarDisciplinaNaTurma(idDisciplina, idTurma) {
-    let url = 'http://localhost:8080/disciplinas/disciplinaTurma';
+async function adionarDisciplinaNaTurma(codigoDisciplina, codigoTurma) {
+    let url = `http://localhost:8080/disciplinas/disciplinaTurma?codigoDisciplina=${codigoDisciplina}&codigoTurma=${codigoTurma}`;
     let parametros = {
-        "codigoDisciplina": idDisciplina,
-        "codigoTurma": idTurma
-    }
-    fetch(url, {
+        "codigoDisciplina": codigoDisciplina,
+        "codigoTurma": codigoTurma
+    };
+    let request = await fetch(url, {
         method: "POST",
         body: JSON.stringify(parametros),
         headers: {'Content-Type': 'application/json'}
-    }).then(function (response) {
-        response.text().then(function (result) {
-            console.log(JSON.parse(result));
-        })
-    }).catch(function (err) {
-        console.log(err);
-    })
+    });
+    return request;
 }
 
 

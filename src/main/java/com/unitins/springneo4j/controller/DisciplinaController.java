@@ -33,7 +33,7 @@ public class DisciplinaController implements WebMvcConfigurer {
     }
 
     @GetMapping("/semrelacionamento")
-    public List<Disciplina> pesquisarDisciplinaPorNome() {
+    public List<Disciplina> retornarDisciplinasSemRelacionamento() {
         return service.getAllWithoutRelationship();
     }
 
@@ -47,9 +47,7 @@ public class DisciplinaController implements WebMvcConfigurer {
     }
 
     @PostMapping("/disciplinaTurma")
-    public void cadastrarDisciplinaNaTurma(@RequestBody ObjectNode objectNode) {
-        Integer codigoDisciplina = objectNode.get("codigoDisciplina").intValue();
-        Integer codigoTurma = objectNode.get("codigoTurma").intValue();
+    public void cadastrarDisciplinaNaTurma(@RequestParam Integer codigoDisciplina, @RequestParam Integer codigoTurma) {
         service.insertDisciplinaTurma(codigoDisciplina, codigoTurma);
     }
 

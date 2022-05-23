@@ -64,7 +64,7 @@ nav ul li:hover > ul{
 nav ul ul li{
     position: relative;
     margin: 0px;
-    width: 210px;
+    width: 220px;
     float: none;
     display: list-item;
     border-bottom: 1px solid rgba(0,0,0,0.3);

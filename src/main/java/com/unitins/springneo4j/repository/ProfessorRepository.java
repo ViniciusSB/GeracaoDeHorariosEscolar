@@ -92,12 +92,32 @@ public class ProfessorRepository {
 
     public List<Record> buscarPorNome(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (p:Professor) WHERE toLower(p.nome) contains '"+parametros.get("nome").toString().toLowerCase()+"' return p;";
+            String query = "MATCH (p:Professor) WHERE toLower(p.nome) contains '"+parametros.get("nome").toString().toLowerCase()+"' RETURN p;";
             Result result = session.run(query, parametros);
             List<Record> records = result.list();
             autorizacao.retornarAutorizacao().close();
             session.close();
             return records;
+        }
+    }
+
+    public List<Record> buscarDisciplinasDoProfessor(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)-[:ProfessorDisciplina]->(d:Disciplina) WHERE p.codigo = $codigo RETURN d;";
+            Result result = session.run(query, parametros);
+            List<Record> records = result.list();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+            return records;
+        }
+    }
+
+    public void deletarRelacionamentoDisciplinaProfessor(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (d:Disciplina)<-[pd:ProfessorDisciplina]-(p:Professor) WHERE d.codigo = $codigo DETACH DELETE pd;";
+            Result result = session.run(query, parametros);
+            autorizacao.retornarAutorizacao().close();
+            session.close();
         }
     }
 }

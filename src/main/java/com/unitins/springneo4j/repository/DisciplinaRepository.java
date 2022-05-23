@@ -24,7 +24,7 @@ public class DisciplinaRepository {
         }
     }
 
-    public List<Record> buscarDisciplinasSemRelacionamento() {
+    public List<Record> buscarDisciplinasSemRelacionamentoComATurma() {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "MATCH (d:Disciplina)<-[td:TurmaDisciplina]-(t:Turma) WITH COLLECT(d) AS discRel MATCH (disc:Disciplina) WHERE NOT disc in discRel RETURN disc;";
             Result result = session.run(query);
@@ -32,6 +32,16 @@ public class DisciplinaRepository {
             return record;
         }
     }
+
+    public List<Record> buscarDisciplinasSemRelacionamentoComOProfessor() {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (d:Disciplina)<-[pd:ProfessorDisciplina]-(p:Professor) WITH COLLECT(d) AS discRel MATCH (disc:Disciplina) WHERE NOT disc in discRel RETURN disc;";
+            Result result = session.run(query);
+            List<Record> record = result.list();
+            return record;
+        }
+    }
+
 
     public void inserir(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {

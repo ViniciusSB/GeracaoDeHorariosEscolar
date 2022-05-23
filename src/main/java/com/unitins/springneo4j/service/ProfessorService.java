@@ -57,6 +57,19 @@ public class ProfessorService {
         return recordToProfessores(records);
     }
 
+    public List<Disciplina> disciplinasProfessorById(Long codigoProfessor) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigo", codigoProfessor);
+        List<Record> records = repository.buscarDisciplinasDoProfessor(parametros);
+        return disciplinaService.recordToDisciplinas(records);
+    }
+
+    public void deleteRelationShipDisciplinaProfessor(Long codigoDisciplina) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigo", codigoDisciplina);
+        repository.deletarRelacionamentoDisciplinaProfessor(parametros);
+    }
+
     public List<Professor> recordToProfessores(List<Record> r) {
         List<Professor> professores = new ArrayList<>();
         for (Record record: r) {

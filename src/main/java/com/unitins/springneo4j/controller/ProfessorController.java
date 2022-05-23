@@ -1,6 +1,7 @@
 package com.unitins.springneo4j.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.unitins.springneo4j.model.Disciplina;
 import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,11 @@ public class ProfessorController implements WebMvcConfigurer {
         return service.searchByName(nome);
     }
 
+    @GetMapping("/{id}/disciplinas")
+    public List<Disciplina> pesquisarDisciplinasProfessorById(@PathVariable Long id) {
+        return service.disciplinasProfessorById(id);
+    }
+
     @PostMapping
     public void cadastrarProfessor(@RequestBody ObjectNode objectNode) {
         service.insert(objectNode.get("nome").asText());
@@ -48,6 +54,11 @@ public class ProfessorController implements WebMvcConfigurer {
     @DeleteMapping("/{id}")
     public void deletarProfessor(@PathVariable Long id) {
         service.deleteById(id);
+    }
+
+    @DeleteMapping("/disciplina/{codigoDisciplina}")
+    public void deletarRelacionamentoDisciplinaProfessor(@PathVariable Long codigoDisciplina) {
+        service.deleteRelationShipDisciplinaProfessor(codigoDisciplina);
     }
 
     @Override

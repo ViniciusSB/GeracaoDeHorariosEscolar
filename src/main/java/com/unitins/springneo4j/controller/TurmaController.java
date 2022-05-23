@@ -33,8 +33,7 @@ public class TurmaController implements WebMvcConfigurer {
         return service.disciplinasTurmaByIdTurma(id);
     }
 
-
-    @RequestMapping(value = "pesquisar", method = RequestMethod.GET)
+    @RequestMapping(value = "/pesquisar", method = RequestMethod.GET)
     public List<Turma> pesquisarTurmaPorNome(@RequestParam String nome) {
         return service.searchByName(nome);
     }

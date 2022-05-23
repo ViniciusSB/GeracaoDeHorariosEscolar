@@ -32,9 +32,14 @@ public class DisciplinaController implements WebMvcConfigurer {
         return service.searchByName(nome);
     }
 
-    @GetMapping("/semrelacionamento")
-    public List<Disciplina> retornarDisciplinasSemRelacionamento() {
-        return service.getAllWithoutRelationship();
+    @GetMapping("/semrelacionamentoturma")
+    public List<Disciplina> retornarDisciplinasSemRelacionamentoTurma() {
+        return service.getAllWithoutRelationshipWithTurma();
+    }
+
+    @GetMapping("/semrelacionamentoprofessor")
+    public List<Disciplina> retornarDisciplinasSemRelacionamentoProfessor() {
+        return service.getAllWithoutRelationshipWithProfessor();
     }
 
     @PostMapping()

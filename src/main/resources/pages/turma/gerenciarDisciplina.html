@@ -12,9 +12,10 @@
     <link rel="stylesheet" href="../../css/records.css">
     <link rel="stylesheet" href="../../css/modal.css">
     <link rel="stylesheet" href="../../css/menuBar.css">
-    <script src="../../javascript/professor/professor.js"></script>
+    <link rel="stylesheet" href="../../css/input.css">
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-    <title>Professor</title>
+    <script src="../../javascript/turma/gerenciarDisciplina.js"></script>
+    <title>Gerenciar disciplina</title>
 </head>
 <body>
 
@@ -31,7 +32,7 @@
             <input type="checkbox" id="btn-0">
             <ul>
                 <li><a href="../turma/turma.html">Listar</a></li>
-                <li><a href="../turma/gerenciarDisciplina.html">Gerenciar disciplinas</a></li>
+                <li><a href="gerenciarDisciplina.html">Gerenciar disciplinas</a></li>
             </ul>
         </li>
         <li>
@@ -52,40 +53,44 @@
 
 <!--    Titulo-->
 <header>
-    <h1 class="header-title">Professor</h1>
+    <h1 class="header-title">Turma - gerenciar disciplina</h1>
 </header>
 
 <!--    Tabela-->
 <main id="main">
-    <button type="button" class="button blue mobile" id="cadastrarProfessor">Cadastrar Professor</button>
-    <input type="text" class="inputPesquisa" placeholder="Pesquisar por nome" id="inputPesquisar">
+
+    <label class="input-select-custom">
+        Selecione uma turma:
+        <select id="selectTurma" style="float: bottom; bottom: 50px;">
+            <option value="0">-----</option>
+        </select>
+    </label>
+
+
     <table class="records" id="tabela">
+
         <tr>
             <th hidden>Id</th>
-            <th>Nome</th>
+            <th>Nome da disciplina</th>
             <th>Ação</th>
         </tr>
 
     </table>
 
-    <!--        Modal-->
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <header class="modal-header">
-                <h2>Novo Professor</h2>
-                <span class="modal-close" id="modalClose">&#10006;</span>
-            </header>
-            <form class="modal-form" id="formModal">
-                <input type="hidden" id="inputId">
-                <input type="text" class="modal-field" id="inputNome" required placeholder="Nome do Professor">
-            </form>
-            <footer class="modal-footer">
-                <button class="button blue" id="btnCancelar">Cancelar</button>
-                <button class="button green" id="btnSalvar">Salvar</button>
-            </footer>
-        </div>
-    </div>
 </main>
+
+<!--        Modal-->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <header class="modal-header">
+            <h2>Adicionar disciplina</h2>
+            <span class="modal-close" id="modalClose">&#10006;</span>
+        </header>
+        <form class="modal-form" id="formModal">
+
+        </form>
+    </div>
+</div>
 
 <!--    Footer-->
 <footer>

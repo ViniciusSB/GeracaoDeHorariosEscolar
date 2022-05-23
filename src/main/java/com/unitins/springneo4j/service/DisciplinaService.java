@@ -19,8 +19,13 @@ public class DisciplinaService {
         return recordToDisciplinas(records);
     }
 
-    public List<Disciplina> getAllWithoutRelationship() {
-        List<Record> records = repository.buscarDisciplinasSemRelacionamento();
+    public List<Disciplina> getAllWithoutRelationshipWithTurma() {
+        List<Record> records = repository.buscarDisciplinasSemRelacionamentoComATurma();
+        return recordToDisciplinas(records);
+    }
+
+    public List<Disciplina> getAllWithoutRelationshipWithProfessor() {
+        List<Record> records = repository.buscarDisciplinasSemRelacionamentoComOProfessor();
         return recordToDisciplinas(records);
     }
 

@@ -240,7 +240,7 @@ async function btnAddDisciplinaNaTurma() {
 }
 
 async function listarDisciplinasSemRelacionamento() {
-    let url = 'http://localhost:8080/disciplinas/semrelacionamento';
+    let url = 'http://localhost:8080/disciplinas/semrelacionamentoturma';
     let request = await fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},

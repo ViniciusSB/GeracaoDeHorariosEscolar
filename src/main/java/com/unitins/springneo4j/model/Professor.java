@@ -17,6 +17,9 @@ public class Professor {
     @Relationship(type = "ProfessorDisciplina", direction = Relationship.Direction.OUTGOING)
     private List<Disciplina> disciplinas;
 
+    @Relationship(type = "RprofessorHorario", direction = Relationship.Direction.OUTGOING)
+    private List<Horario> restricaoHorario;
+
     public Long getId() {
         return id;
     }
@@ -47,5 +50,13 @@ public class Professor {
 
     public void setDisciplinas(List<Disciplina> disciplinas) {
         this.disciplinas = disciplinas;
+    }
+
+    public List<Horario> getRestricaoHorario() {
+        return restricaoHorario;
+    }
+
+    public void setRestricaoHorario(List<Horario> restricaoHorario) {
+        this.restricaoHorario = restricaoHorario;
     }
 }

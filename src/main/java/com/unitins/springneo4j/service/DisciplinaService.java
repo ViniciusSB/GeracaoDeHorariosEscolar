@@ -47,6 +47,13 @@ public class DisciplinaService {
         repository.inserirDiscipinaNaTurma(parametros);
     }
 
+    public void insertDisciplinaProfessor(Integer codigoDisciplina, Integer codigoProfessor) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoDisciplina", codigoDisciplina);
+        parametros.put("codigoProfessor", codigoProfessor);
+        repository.inserirDiscipinaParaOProfessor(parametros);
+    }
+
     public Integer retornarMaiorCodigo() {
         return repository.retornarMaiorCodigo();
     }

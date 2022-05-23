@@ -62,6 +62,16 @@ public class DisciplinaRepository {
         }
     }
 
+    public void inserirDiscipinaParaOProfessor(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (d:Disciplina), (p:Professor) WHERE d.codigo = $codigoDisciplina AND p.codigo = $codigoProfessor CREATE (d)<-[pd:ProfessorDisciplina]-(p) RETURN d,p;";
+            Result result = session.run(query, parametros);
+            List<Record> record = result.list();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+        }
+    }
+
     public Integer retornarMaiorCodigo() {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "MATCH (d:Disciplina) RETURN d ORDER BY d.codigo DESC LIMIT 1";
@@ -117,7 +127,4 @@ public class DisciplinaRepository {
             return r;
         }
     }
-
-
-
 }

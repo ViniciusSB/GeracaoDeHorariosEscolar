@@ -43,7 +43,6 @@ function carregarProfessores() {
     }).catch(function (err) {
         console.log(err);
     })
-
 }
 
 function addProfessoresSelect(professores) {
@@ -173,7 +172,6 @@ function updateTabela(){
 }
 
 async function addElementosNoModal() {
-
     let disciplinas = await listarDisciplinasSemRelacionamento();
     if (disciplinas.length === 0) {
         let form = document.getElementById("formModal");

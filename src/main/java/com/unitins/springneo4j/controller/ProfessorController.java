@@ -2,6 +2,7 @@ package com.unitins.springneo4j.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.unitins.springneo4j.model.Disciplina;
+import com.unitins.springneo4j.model.Horario;
 import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.service.ProfessorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,11 @@ public class ProfessorController implements WebMvcConfigurer {
         return service.disciplinasProfessorById(id);
     }
 
+    @GetMapping("/{id}/horarios")
+    public List<Horario> pesquisarHorariosRestricaoProfessorById(@PathVariable Long id) {
+        return service.horariosRestricaoProfessorById(id);
+    }
+
     @PostMapping
     public void cadastrarProfessor(@RequestBody ObjectNode objectNode) {
         service.insert(objectNode.get("nome").asText());
@@ -59,6 +65,11 @@ public class ProfessorController implements WebMvcConfigurer {
     @DeleteMapping("/disciplina/{codigoDisciplina}")
     public void deletarRelacionamentoDisciplinaProfessor(@PathVariable Long codigoDisciplina) {
         service.deleteRelationShipDisciplinaProfessor(codigoDisciplina);
+    }
+
+    @DeleteMapping("/deleteHorario")
+    public void deletarRelacionamentoHorarioProfessor(@RequestParam Long codigoHorario, @RequestParam Long codigoProfessor) {
+        service.deleteRelationShipHorarioProfessor(codigoHorario, codigoProfessor);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.unitins.springneo4j.service;
 
 import com.unitins.springneo4j.model.Disciplina;
+import com.unitins.springneo4j.model.Horario;
 import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.repository.ProfessorRepository;
 import org.neo4j.driver.Record;
@@ -14,6 +15,7 @@ import java.util.List;
 public class ProfessorService {
 
     ProfessorRepository repository = new ProfessorRepository();
+    HorarioService horarioService = new HorarioService();
     DisciplinaService disciplinaService = new DisciplinaService();
 
     public List<Professor> getAll() {
@@ -64,10 +66,24 @@ public class ProfessorService {
         return disciplinaService.recordToDisciplinas(records);
     }
 
+    public List<Horario> horariosRestricaoProfessorById(Long codigoProfessor) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigo", codigoProfessor);
+        List<Record> records = repository.buscarHorariosRestricaoDoProfessor(parametros);
+        return horarioService.recordToHorarios(records);
+    }
+
     public void deleteRelationShipDisciplinaProfessor(Long codigoDisciplina) {
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", codigoDisciplina);
         repository.deletarRelacionamentoDisciplinaProfessor(parametros);
+    }
+
+    public void deleteRelationShipHorarioProfessor(Long codigoHorario, Long codigoProfessor) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoHorario", codigoHorario);
+        parametros.put("codigoProfessor", codigoProfessor);
+        repository.deletarRelacionamentoHorarioProfessor(parametros);
     }
 
     public List<Professor> recordToProfessores(List<Record> r) {

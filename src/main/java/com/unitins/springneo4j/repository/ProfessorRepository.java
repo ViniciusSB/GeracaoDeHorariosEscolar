@@ -112,9 +112,29 @@ public class ProfessorRepository {
         }
     }
 
+    public List<Record> buscarHorariosRestricaoDoProfessor(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)-[:RprofessorHorario]->(h:Horario) WHERE p.codigo = $codigo RETURN h;";
+            Result result = session.run(query, parametros);
+            List<Record> records = result.list();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+            return records;
+        }
+    }
+
     public void deletarRelacionamentoDisciplinaProfessor(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "MATCH (d:Disciplina)<-[pd:ProfessorDisciplina]-(p:Professor) WHERE d.codigo = $codigo DETACH DELETE pd;";
+            Result result = session.run(query, parametros);
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+        }
+    }
+
+    public void deletarRelacionamentoHorarioProfessor(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)-[rph:RprofessorHorario]->(h:Horario) WHERE p.codigo = $codigoProfessor AND h.codigo = $codigoHorario DETACH DELETE rph;";
             Result result = session.run(query, parametros);
             autorizacao.retornarAutorizacao().close();
             session.close();

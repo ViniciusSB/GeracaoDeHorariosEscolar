@@ -57,6 +57,11 @@ public class ProfessorController implements WebMvcConfigurer {
         service.update(p);
     }
 
+    @PostMapping("/horarios")
+    public List<Horario> inserirRestricaoHorarioProfessor(@RequestParam Long codigoProfessor, @RequestParam List<Long> codigoHorarios) {
+        return service.inserirRestricaoHorario(codigoProfessor, codigoHorarios);
+    }
+
     @DeleteMapping("/{id}")
     public void deletarProfessor(@PathVariable Long id) {
         service.deleteById(id);

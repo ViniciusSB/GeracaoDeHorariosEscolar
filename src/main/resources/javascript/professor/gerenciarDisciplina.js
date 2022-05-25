@@ -251,13 +251,8 @@ async function listarDisciplinasSemRelacionamento() {
 
 async function adionarDisciplinaParaOProfessor(codigoDisciplina, codigoProfessor) {
     let url = `http://localhost:8080/disciplinas/disciplinaProfessor?codigoDisciplina=${codigoDisciplina}&codigoProfessor=${codigoProfessor}`;
-    let parametros = {
-        "codigoDisciplina": codigoDisciplina,
-        "codigoProfessor": codigoProfessor
-    };
     let request = await fetch(url, {
         method: "POST",
-        body: JSON.stringify(parametros),
         headers: {'Content-Type': 'application/json'}
     });
     return request;

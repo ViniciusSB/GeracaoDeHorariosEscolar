@@ -11,7 +11,10 @@ window.onload = async function () {
 
     document.getElementById('modalClose').addEventListener('click', closeModal);
     document.getElementById('btnCancelar').addEventListener('click', closeModal);
+    document.getElementById("btnSalvar").addEventListener('click', salvarHorarioProfessor);
 }
+
+let restricoesProfessor;
 
 const openModal = () => document.getElementById('modal')
     .classList.add('active');
@@ -33,6 +36,7 @@ async function carregarHorariosRestricaoProfessor(codigoProfessor) {
     });
     let request = await requisicao.text();
     let horarios = JSON.parse(request);
+    restricoesProfessor = horarios;
     return horarios;
 }
 
@@ -51,21 +55,20 @@ function montarHorariosNaTabela(horarios) {
 }
 
 async function deletarHorarioProfessor(codigoHorario) {
-    let select = document.getElementById("selectProfessor");
-    let url = `http://localhost:8080/professores/deleteHorario?codigoProfessor=${select.value}&codigoHorario=${codigoHorario}`;
-    await fetch(url, {
-        mode: "cors",
-        method: "DELETE"
-    }).then(async result => {
-        if (result.status === 200) {
-            updateTabela();
-            let horarios = await carregarHorariosRestricaoProfessor(document.getElementById("selectProfessor").value);
-            montarHorariosNaTabela(horarios);
-        }
-    }).catch(function (err) {
-        console.log(err);
-    })
-
+    if (confirm("Deseja realmente exluir esse registro?")) {
+        let select = document.getElementById("selectProfessor");
+        let url = `http://localhost:8080/professores/deleteHorario?codigoProfessor=${select.value}&codigoHorario=${codigoHorario}`;
+        await fetch(url, {
+            mode: "cors",
+            method: "DELETE"
+        }).then(async result => {
+            if (result.status === 200) {
+                await updateTabela();
+            }
+        }).catch(function (err) {
+            console.log(err);
+        })
+    }
 }
 
 async function updateTabela(){
@@ -174,10 +177,60 @@ async function addElementosNoModal() {
     let horarios = await listarTodosOsHorarios();
     console.log(horarios);
     addElementosNoCheckbox(horarios);
+    marcarDisciplinasDoProfessor();
 }
 
 function addElementosNoCheckbox(horarios) {
+    let formModal = document.getElementById("formModal");
+    for (let i=0; i<horarios.length;i++) {
+        let checkbox = document.createElement("input");
+        let label = document.createElement("label");
+        checkbox.id = horarios[i].codigo;
+        checkbox.type = "checkbox";
+        checkbox.name = "restricoes";
+        label.htmlFor = horarios[i].codigo;
+        label.textContent = horarios[i].descricao;
+        formModal.appendChild(checkbox);
+        formModal.appendChild(label);
+    }
+}
 
+function marcarDisciplinasDoProfessor() {
+    let checkboxes = document.querySelectorAll("#formModal > input[type='checkbox']");
+    checkboxes.forEach(checks => {
+        restricoesProfessor.forEach((check) => {
+            if (parseInt(checks.id) === check.codigo) {
+                checks.checked = true;
+            }
+        })
+    })
+}
+
+async function salvarRestricaoHorario() {
+    let marcados = document.querySelectorAll("#formModal > input[type=checkbox]:checked");
+    let codigoHorarios = [];
+    marcados.forEach(elemento => {
+        codigoHorarios.push(parseInt(elemento.id));
+    })
+    let codigoProfessor = document.getElementById("selectProfessor");
+    let url = `http://localhost:8080/professores/horarios?codigoHorarios=${codigoHorarios}&codigoProfessor=${codigoProfessor.value}`;
+    let request = await fetch(url, {
+        method: "POST",
+        mode: "no-cors"
+    })
+    let response = await request.text();
+    let horarios = await JSON.parse(response);
+    return horarios;
+}
+
+const salvarHorarioProfessor = async () => {
+    await salvarRestricaoHorario();
+    removerElementosModal();
+    deletarTabela();
+    criarTabela();
+    let horarios = await carregarHorariosRestricaoProfessor(document.getElementById("selectProfessor").value);
+    montarHorariosNaTabela(horarios);
+    document.getElementById('modal').classList.remove('active');
 }
 
 async function listarTodosOsHorarios() {

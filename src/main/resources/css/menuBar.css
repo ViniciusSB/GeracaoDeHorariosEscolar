@@ -77,7 +77,7 @@ nav ul ul ul li{
     top: -60px;
     left: 210px;
 }
-.show,.icon,input[type=checkbox]{
+.show,.icon, nav#navMenuBar input[type=checkbox]{
     display: none;
 }
 .fa-plus{

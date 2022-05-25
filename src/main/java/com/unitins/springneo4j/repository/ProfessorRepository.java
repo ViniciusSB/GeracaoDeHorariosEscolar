@@ -47,6 +47,38 @@ public class ProfessorRepository {
         }
     }
 
+    public List<Record> inserirHorariosProfessor(HashMap<String, Object> parametros, List<Long> codigos) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            StringBuilder query = new StringBuilder();
+            query.append("MATCH(p1:Professor) WHERE p1.codigo = $codigoProfessor ");
+            //MATC
+            for (int i = 0; i<codigos.size(); i++) {
+                String h = "h" + i;
+                query.append("MATCH("+h+":Horario) WHERE "+h+".codigo = "+codigos.get(i).toString()+" ");
+            }
+            //CREATE
+            for (int i = 0; i<codigos.size(); i++) {
+                String h = "h" + i;
+                query.append("CREATE(p1)-[:RprofessorHorario]->("+h+") ");
+            }
+            //RETURN
+            query.append("RETURN ");
+            for (int i = 0; i<codigos.size(); i++) {
+                String h = "h" + i;
+                if (i != codigos.size()-1) {
+                    query.append(""+h+", ");
+                    continue;
+                }
+                query.append(""+h+"; ");
+            }
+            Result result = session.run(query.toString(), parametros);
+            List<Record> records = result.list();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+            return records;
+        }
+    }
+
     public Integer retornarMaiorCodigo() {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             Result result = session.run("MATCH (p:Professor) RETURN p ORDER BY p.codigo DESC LIMIT 1");
@@ -135,6 +167,15 @@ public class ProfessorRepository {
     public void deletarRelacionamentoHorarioProfessor(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "MATCH (p:Professor)-[rph:RprofessorHorario]->(h:Horario) WHERE p.codigo = $codigoProfessor AND h.codigo = $codigoHorario DETACH DELETE rph;";
+            Result result = session.run(query, parametros);
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+        }
+    }
+
+    public void deletarAllRelacionamentosHorarioProfessor(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)-[rph:RprofessorHorario]->(h:Horario) WHERE p.codigo = $codigoProfessor DETACH DELETE rph;";
             Result result = session.run(query, parametros);
             autorizacao.retornarAutorizacao().close();
             session.close();

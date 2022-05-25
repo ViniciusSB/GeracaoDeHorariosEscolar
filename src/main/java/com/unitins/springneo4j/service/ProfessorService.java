@@ -32,6 +32,18 @@ public class ProfessorService {
         repository.inserir(parametros);
     }
 
+    //Deleta todos os relacionamentos e insere os que foram selecionados
+    public List<Horario> inserirRestricaoHorario(Long codigoProfessor, List<Long> codigoHorarios) {
+        if (!codigoHorarios.isEmpty()) {
+            HashMap<String, Object> parametros = new HashMap<>();
+            parametros.put("codigoProfessor", codigoProfessor);
+            repository.deletarAllRelacionamentosHorarioProfessor(parametros);
+            List<Record> records = repository.inserirHorariosProfessor(parametros, codigoHorarios);
+            return horarioService.recordToHorarios(records);
+        }
+        return new ArrayList<>();
+    }
+
     public Professor getById(Long codigo) {
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", codigo);

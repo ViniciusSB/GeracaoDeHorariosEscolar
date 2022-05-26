@@ -1,9 +1,9 @@
 'use strict'
 
 window.onload=function(){
-
+    ativarLoading();
     carregarProfessores();
-
+    retirarLoading();
     document.getElementById("selectProfessor").addEventListener('change', (e) => {
         if (e.currentTarget.value !== "0") {
             updateTabela();
@@ -14,6 +14,24 @@ window.onload=function(){
     })
 
     document.getElementById('modalClose').addEventListener('click', closeModal);
+}
+
+const ativarLoading = () => {
+    window.addEventListener("load", function () {
+        const loader = document.getElementById("loader");
+        let img = document.createElement("img");
+        img.src = "../../images/loading.gif";
+        img.id = "imgLoading";
+        loader.className = "loader";
+        loader.appendChild(img);
+    });
+}
+
+const retirarLoading = () => {
+    window.addEventListener("load", function () {
+        const loader = document.getElementById("loader");
+        loader.className += " hidden";
+    })
 }
 
 const openModal = () => document.getElementById('modal')

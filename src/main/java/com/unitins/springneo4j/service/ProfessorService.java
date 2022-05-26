@@ -112,13 +112,6 @@ public class ProfessorService {
         p.setId(record.get(0).asNode().id());
         p.setNome(record.get(0).asNode().get("nome").toString().substring(1, record.get(0).asNode().get("nome").toString().length() -1));
         p.setCodigo(Long.parseLong(record.get(0).asNode().get("codigo").toString()));
-        List<Record> re = repository.buscarDisciplinaDeUmProfessor(p.getCodigo());
-        if (re.size() > 0) {
-            List<Disciplina> disciplinas = disciplinaService.recordToDisciplinas(re);
-            p.setDisciplinas(disciplinas);
-        } else {
-            p.setDisciplinas(new ArrayList<>());
-        }
         return p;
     }
 }

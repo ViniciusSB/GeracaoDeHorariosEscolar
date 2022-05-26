@@ -218,19 +218,11 @@ async function salvarRestricaoHorario() {
         method: "POST",
         mode: "no-cors"
     })
-    let response = await request.text();
-    let horarios = await JSON.parse(response);
-    return horarios;
 }
 
-const salvarHorarioProfessor = async () => {
+async function salvarHorarioProfessor() {
     await salvarRestricaoHorario();
-    removerElementosModal();
-    deletarTabela();
-    criarTabela();
-    let horarios = await carregarHorariosRestricaoProfessor(document.getElementById("selectProfessor").value);
-    montarHorariosNaTabela(horarios);
-    document.getElementById('modal').classList.remove('active');
+    await closeModal();
 }
 
 async function listarTodosOsHorarios() {

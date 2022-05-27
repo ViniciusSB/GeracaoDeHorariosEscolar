@@ -5,6 +5,7 @@ import org.neo4j.driver.Record;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.NoSuchRecordException;
+import org.neo4j.driver.exceptions.ResultConsumedException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,55 @@ public class HorarioRepository {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "CREATE (h:Horario {codigo: $codigo, descricao: $descricao, inicio: $inicio, fim: $fim, ordem: $ordem})";
             Result result = session.run(query, parametros);
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+        }
+    }
+
+    public Record gerarGradeDeHorario(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH(t:Turma)-[:TurmaDisciplina]->(d:Disciplina {codigo: $codigoDisciplina})<-[:ProfessorDisciplina]-(p:Professor)" +
+                    " MATCH(h:Horario) WHERE NOT (h)-[:HorarioAula]->(p) AND NOT (h)-[:HorarioAula]->(t) AND NOT (p)-[:RprofessorHorario]->(h)" +
+                    " WITH d, t, h, p LIMIT 1" +
+                    " OPTIONAL MATCH(d)<-[had:HorarioAula]-(:Horario)" +
+                    " WITH d, t, h, p, d.aulasemanal AS n_aula, COUNT(had) as had" +
+                    " WHERE had < n_aula" +
+                    " CREATE(h)-[:HorarioAula]->(p)" +
+                    " CREATE(h)-[:HorarioAula]->(t)" +
+                    " CREATE(h)-[:HorarioAula]->(d)" +
+                    " RETURN *";
+            Result result = session.run(query, parametros);
+            try {
+                Record record = result.single();
+                autorizacao.retornarAutorizacao().close();
+                session.close();
+                return record;
+            } catch (NoSuchRecordException ex) {
+                return null;
+            }
+        }
+    }
+
+    public void deletarRelacionamentosHorario(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String url = "MATCH (h:Horario)-[hap:HorarioAula]->(p:Professor) " +
+                    " MATCH (h:Horario)-[hat:HorarioAula]->(t:Turma) " +
+                    " MATCH (h:Horario)-[had:HorarioAula]->(d:Disciplina) " +
+                    " WHERE h.codigo = $codigoHorario AND p.codigo = $codigoProfessor " +
+                    " AND t.codigo = $codigoTurma AND d.codigo = $codigoDisciplina " +
+                    " DETACH DELETE hap, hat, had;";
+            Result result = session.run(url, parametros);
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+        }
+    }
+
+    public void deletarTodosOsRelacionamentosHorario() {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            Result result = session.run("MATCH (h:Horario)-[hap:HorarioAula]->(p:Professor) " +
+                    " MATCH (h:Horario)-[hat:HorarioAula]->(t:Turma) " +
+                    " MATCH (h:Horario)-[had:HorarioAula]->(d:Disciplina) " +
+                    " DETACH DELETE hap, hat, had;");
             autorizacao.retornarAutorizacao().close();
             session.close();
         }

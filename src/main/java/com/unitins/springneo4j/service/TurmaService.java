@@ -4,6 +4,7 @@ import com.unitins.springneo4j.model.Disciplina;
 import com.unitins.springneo4j.model.Turma;
 import com.unitins.springneo4j.repository.TurmaRepository;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.types.Node;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -85,6 +86,14 @@ public class TurmaService {
         t.setId(r.get(0).asNode().id());
         t.setCodigo(Long.parseLong(r.get(0).asNode().get("codigo").toString()));
         t.setNome(r.get(0).asNode().get("nome").toString().substring(1, r.get(0).asNode().get("nome").toString().length() - 1));
+        return t;
+    }
+
+    public Turma nodeToTurma(Node node) {
+        Turma t = new Turma();
+        t.setId(node.id());
+        t.setCodigo(Long.parseLong(node.get("codigo").toString()));
+        t.setNome(node.get("nome").toString().substring(1, node.get("nome").toString().length() - 1));
         return t;
     }
 }

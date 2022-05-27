@@ -3,6 +3,7 @@ package com.unitins.springneo4j.service;
 import com.unitins.springneo4j.model.Disciplina;
 import com.unitins.springneo4j.repository.DisciplinaRepository;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.types.Node;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -104,6 +105,16 @@ public class DisciplinaService {
         d.setCodigo(Long.parseLong(record.get(0).asNode().get("codigo").toString()));
         d.setCargaHoraria(Integer.parseInt(record.get(0).asNode().get("ch").toString()));
         d.setAulaSemanal(Integer.parseInt(record.get(0).asNode().get("aulasemanal").toString()));
+        return d;
+    }
+
+    public Disciplina nodeToDisciplina(Node node) {
+        Disciplina d = new Disciplina();
+        d.setId(node.id());
+        d.setNome(node.get("nome").toString().substring(1, node.get("nome").toString().length() -1));
+        d.setCodigo(Long.parseLong(node.get("codigo").toString()));
+        d.setCargaHoraria(Integer.parseInt(node.get("ch").toString()));
+        d.setAulaSemanal(Integer.parseInt(node.get("aulasemanal").toString()));
         return d;
     }
 }

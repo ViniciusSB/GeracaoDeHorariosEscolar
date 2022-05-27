@@ -5,6 +5,7 @@ import com.unitins.springneo4j.model.Horario;
 import com.unitins.springneo4j.model.Professor;
 import com.unitins.springneo4j.repository.ProfessorRepository;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.types.Node;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -114,6 +115,14 @@ public class ProfessorService {
         p.setId(record.get(0).asNode().id());
         p.setNome(record.get(0).asNode().get("nome").toString().substring(1, record.get(0).asNode().get("nome").toString().length() -1));
         p.setCodigo(Long.parseLong(record.get(0).asNode().get("codigo").toString()));
+        return p;
+    }
+
+    public Professor nodeToProfessor(Node node) {
+        Professor p = new Professor();
+        p.setId(node.id());
+        p.setNome(node.get("nome").toString().substring(1, node.get("nome").toString().length() -1));
+        p.setCodigo(Long.parseLong(node.get("codigo").toString()));
         return p;
     }
 }

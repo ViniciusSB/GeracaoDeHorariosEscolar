@@ -12,9 +12,23 @@ window.onload = async function () {
     document.getElementById('modalClose').addEventListener('click', closeModal);
     document.getElementById('btnCancelar').addEventListener('click', closeModal);
     document.getElementById("btnSalvar").addEventListener('click', salvarHorarioProfessor);
+
+    retirar_loading();
 }
 
 let restricoesProfessor;
+
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
+}
+
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
+}
 
 const openModal = () => document.getElementById('modal')
     .classList.add('active');

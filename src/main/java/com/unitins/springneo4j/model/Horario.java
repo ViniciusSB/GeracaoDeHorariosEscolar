@@ -2,6 +2,9 @@ package com.unitins.springneo4j.model;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
+
+import java.util.List;
 
 @Node
 public class Horario {
@@ -13,6 +16,15 @@ public class Horario {
     private Integer inicio;
     private Integer fim;
     private Integer ordem;
+
+    @Relationship(type = "HorarioAula", direction = Relationship.Direction.OUTGOING)
+    private List<Professor> professores;
+
+    @Relationship(type = "HorarioAula", direction = Relationship.Direction.OUTGOING)
+    private List<Disciplina> disciplinas;
+
+    @Relationship(type = "HorarioAula", direction = Relationship.Direction.OUTGOING)
+    private List<Turma> turmas;
 
     public Long getId() {
         return id;
@@ -60,5 +72,29 @@ public class Horario {
 
     public void setOrdem(Integer ordem) {
         this.ordem = ordem;
+    }
+
+    public List<Professor> getProfessores() {
+        return professores;
+    }
+
+    public void setProfessores(List<Professor> professores) {
+        this.professores = professores;
+    }
+
+    public List<Disciplina> getDisciplinas() {
+        return disciplinas;
+    }
+
+    public void setDisciplinas(List<Disciplina> disciplinas) {
+        this.disciplinas = disciplinas;
+    }
+
+    public List<Turma> getTurmas() {
+        return turmas;
+    }
+
+    public void setTurmas(List<Turma> turmas) {
+        this.turmas = turmas;
     }
 }

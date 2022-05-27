@@ -8,7 +8,7 @@ const closeModal = () => {
     document.getElementById('modal').classList.remove('active');
 }
 
-window.onload=function(){
+window.onload=async function () {
     document.getElementById('cadastrarProfessor').addEventListener('click', openModal);
 
     document.getElementById('modalClose').addEventListener('click', closeModal);
@@ -17,18 +17,29 @@ window.onload=function(){
 
     document.getElementById('btnSalvar').addEventListener('click', cadastrarProfessor);
 
-    document.getElementById("inputPesquisar").addEventListener('input', (e) => {
+    document.getElementById("inputPesquisar").addEventListener('input', async (e) => {
         if (e.currentTarget.value == "") {
-            updateTabela();
+            await updateTabela();
         } else {
-            pesquisarProfessor(e.currentTarget.value);
+            await pesquisarProfessor(e.currentTarget.value);
         }
     })
 
-    updateTabela();
+    await updateTabela();
+    retirar_loading();
 }
 
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
+}
 
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
+}
 
 function limparCampos() {
     let nome = document.getElementById("inputNome");
@@ -36,15 +47,14 @@ function limparCampos() {
     nome.value = "";
 }
 
-function carregarProfessores() {
-    fetch("http://localhost:8080/professores", {
+async function carregarProfessores() {
+    await fetch("http://localhost:8080/professores", {
         method: "GET",
         headers: {'Content-Type': 'application/json'},
         mode: "cors"
-        // body: JSON.stringify(parametros)
-    }).then(function (response) {
-        response.text().then(function (result){
-            var professores = JSON.parse(result);
+    }).then(async function (response) {
+        await response.text().then(async function (result) {
+            let professores = await JSON.parse(result);
             console.log(professores);
             if (professores.length > 0) {
                 addProfessoresTabela(professores);
@@ -63,7 +73,7 @@ function addProfessoresTabela(professores) {
         let tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td hidden>${professores[i].id}</td>
+            <td hidden>${professores[i].codigo}</td>
             <td>${professores[i].nome}</td> 
             <td>
                 <button type="button" class="button green" onclick="javascript:editarRegistro(${professores[i].codigo})">editar</button>
@@ -72,6 +82,22 @@ function addProfessoresTabela(professores) {
         `;
         tabela.appendChild(tr);
     }
+}
+
+function addUmProfessorNaTabela(professor) {
+    var tabela = document.getElementById("tabela");
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+        <td hidden>${professor.codigo}</td>
+        <td>${professor.nome}</td> 
+        <td>
+            <button type="button" class="button green" onclick="javascript:editarRegistro(${professor.codigo})">editar</button>
+            <button type="button" class="button red" onclick="javascript:excluirRegistro(${professor.codigo})">excluir</button>
+        </td>   
+    `;
+    tabela.appendChild(tr);
 }
 
 function criarTabela() {
@@ -95,6 +121,7 @@ function deletarTabela() {
 }
 
 async function cadastrarProfessor() {
+    ativar_loading();
     let formModal = document.getElementById("formModal");
     if (formModal.reportValidity()) {
         let nome = document.getElementById("inputNome");
@@ -104,26 +131,37 @@ async function cadastrarProfessor() {
         }
 
         //incluir
-        if (nome.value.length > 0 && id.value == "") {
-            let request = new XMLHttpRequest();
-            request.open("POST", "http://localhost:8080/professores");
-            request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            request.send(JSON.stringify(parametros));
-            await delay(0.6);
-        } else if (nome.value.length > 0 && id.value != "") { //Atualizar
-            parametros.codigo = id.value;
-            fetch(`http://localhost:8080/professores`, {
+        if (nome.value.length > 0 && id.value === "") {
+            let url = "http://localhost:8080/professores";
+            let request = await fetch(`http://localhost:8080/professores`, {
+                method: 'POST',
+                mode: "cors",
+                body: nome.value
+            });
+            let response = await request.text();
+            let professor = JSON.parse(response);
+            addUmProfessorNaTabela(professor);
+            closeModal();
+            retirar_loading();
+        } else if (nome.value.length > 0 && id.value !== "") { //Atualizar
+           parametros.codigo = id.value;
+           let request = await fetch(`http://localhost:8080/professores`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json'},
                 body: JSON.stringify(parametros)
             });
-            await delay(0.6);
+            let response = await request.text();
+            let professor = JSON.parse(response);
+            //Atualizando o elemento na tabela
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === parseInt(id.value)) {
+                    tr.children[1].textContent = nome.value;
+                }
+            });
+            closeModal();
+            retirar_loading();
         }
-
-        limparCampos();
-        updateTabela();
-        closeModal();
-        console.log(id.value);
     }
 
 }
@@ -134,21 +172,22 @@ function delay(n){
     });
 }
 
-function updateTabela(){
+async function updateTabela(){
     deletarTabela();
     criarTabela();
-    carregarProfessores();
+    await carregarProfessores();
 }
 
-function editarRegistro(codigo) {
+async function editarRegistro(codigo) {
+    ativar_loading();
     openModal();
     let url = `http://localhost:8080/professores/${codigo}`;
-    fetch(url, {
+    await fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},
-    }).then(function (response) {
-        response.text().then(function (result){
-            let professor = JSON.parse(result);
+    }).then(async function (response) {
+        await response.text().then(async function (result) {
+            let professor = await JSON.parse(result);
             console.log(professor);
             document.getElementById("inputNome").value = professor.nome;
             document.getElementById("inputId").value = professor.codigo;
@@ -156,31 +195,35 @@ function editarRegistro(codigo) {
     }).catch(function (err) {
         console.log(err);
     })
+    retirar_loading();
 }
 
-function excluirRegistro(codigo) {
-    var resposta = window.confirm("Deseja realmente excluir esse registro?");
+async function excluirRegistro(codigo) {
+    let resposta = window.confirm("Deseja realmente excluir esse registro?");
     if (resposta) {
+        ativar_loading();
         let url = `http://localhost:8080/professores/${codigo}`;
-        fetch(url, {
+        await fetch(url, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
-        }).then(function (response) {
-            updateTabela();
+        }).then(async function (response) {
+            await updateTabela();
         }).catch(function (err) {
             console.log(err);
         })
+        retirar_loading();
     }
+
 }
 
-function pesquisarProfessor(campo) {
+async function pesquisarProfessor(campo) {
     let url = `http://localhost:8080/professores/pesquisar?nome=${campo}`;
-    fetch(url, {
+    await fetch(url, {
         method: "GET",
         headers: {'Content-Type': 'application/json'},
-    }).then(function (response) {
-        response.text().then(function (result) {
-            let dados = JSON.parse(result);
+    }).then(async function (response) {
+        await response.text().then(async function (result) {
+            let dados = await JSON.parse(result);
             console.log(dados);
             deletarTabela();
             criarTabela();

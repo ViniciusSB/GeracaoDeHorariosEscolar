@@ -38,12 +38,14 @@ public class ProfessorRepository {
         }
     }
 
-    public void inserir(HashMap<String, Object> parametros) {
+    public Record inserir(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "CREATE (p:Professor {codigo: $codigo, nome: $nome})";
+            String query = "CREATE (p:Professor {codigo: $codigo, nome: $nome}) RETURN p;";
             Result result = session.run(query, parametros);
+            Record record = result.single();
             autorizacao.retornarAutorizacao().close();
             session.close();
+            return record;
         }
     }
 
@@ -113,12 +115,14 @@ public class ProfessorRepository {
         }
     }
 
-    public void atualizarPorCodigo(HashMap<String, Object> parametros) {
+    public Record atualizarPorCodigo(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (p:Professor) WHERE p.codigo = $codigo SET p.nome = $nome;";
-            session.run(query, parametros);
+            String query = "MATCH (p:Professor) WHERE p.codigo = $codigo SET p.nome = $nome RETURN p;";
+            Result result = session.run(query, parametros);
+            Record record = result.single();
             autorizacao.retornarAutorizacao().close();
             session.close();
+            return record;
         }
     }
 

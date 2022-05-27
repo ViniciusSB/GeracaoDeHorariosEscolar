@@ -24,12 +24,13 @@ public class ProfessorService {
         return professores;
     }
 
-    public void insert(String nome) {
+    public Professor insert(String nome) {
         Integer codigo = repository.retornarMaiorCodigo();
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", codigo);
         parametros.put("nome", nome);
-        repository.inserir(parametros);
+        Record record = repository.inserir(parametros);
+        return recordToProfessor(record);
     }
 
     //Deleta todos os relacionamentos e insere os que foram selecionados
@@ -57,11 +58,12 @@ public class ProfessorService {
         repository.deletarPorCodigo(parametros);
     }
 
-    public void update(Professor professor) {
+    public Professor update(Professor professor) {
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", professor.getCodigo());
         parametros.put("nome", professor.getNome());
-        repository.atualizarPorCodigo(parametros);
+        Record record = repository.atualizarPorCodigo(parametros);
+        return recordToProfessor(record);
     }
 
     public List<Professor> searchByName(String nome) {

@@ -1,13 +1,14 @@
 'use strict'
 
 window.onload=function(){
-    ativarLoading();
     carregarProfessores();
-    retirarLoading();
+    retirar_loading();
     document.getElementById("selectProfessor").addEventListener('change', (e) => {
         if (e.currentTarget.value !== "0") {
+            ativar_loading();
             updateTabela();
             carregarDisciplinaProfessor(e.currentTarget.value);
+            retirar_loading();
         } else {
             limparCampos()
         }
@@ -16,33 +17,26 @@ window.onload=function(){
     document.getElementById('modalClose').addEventListener('click', closeModal);
 }
 
-const ativarLoading = () => {
-    window.addEventListener("load", function () {
-        const loader = document.getElementById("loader");
-        let img = document.createElement("img");
-        img.src = "../../images/loading.gif";
-        img.id = "imgLoading";
-        loader.className = "loader";
-        loader.appendChild(img);
-    });
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
 }
 
-const retirarLoading = () => {
-    window.addEventListener("load", function () {
-        const loader = document.getElementById("loader");
-        loader.className += " hidden";
-    })
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
 }
 
 const openModal = () => document.getElementById('modal')
     .classList.add('active');
 
 const closeModal = () => {
+    ativar_loading();
     document.getElementById('modal').classList.remove('active');
     removerElementosModal();
-    deletarTabela();
-    criarTabela();
-    addDisciplinasTabela(document.getElementById("selectProfessor").value);
+    retirar_loading();
 }
 
 function carregarProfessores() {
@@ -160,8 +154,20 @@ function adicionarDisciplinasTabela(disciplinas) {
     }
 }
 
+function adicionarUmaDisciplinaTabela(disciplina) {
+    var tabela = document.getElementById("tabela");
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td hidden>${disciplina.id}</td>
+        <td>${disciplina.nome}</td>
+        <td><button type="button" class="button red" onclick="excluirDisciplina(${disciplina.codigo})">remover</button></td>
+    `;
+    tabela.appendChild(tr);
+}
+
 async function excluirDisciplina(codigo) {
     if (window.confirm("Deseja realmente excluir esse registro?") === true) {
+        ativar_loading();
         await fetch(`http://localhost:8080/professores/disciplina/${codigo}`, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
@@ -170,12 +176,15 @@ async function excluirDisciplina(codigo) {
         })
         updateTabela()
         addDisciplinasTabela(document.getElementById("selectProfessor").value);
+        retirar_loading();
     }
 }
 
 function limparCampos() {
+    ativar_loading();
     removerBotaoAddDisciplina();
     updateTabela();
+    retirar_loading();
 }
 
 function removerBotaoAddDisciplina() {
@@ -238,11 +247,14 @@ function removerElementosModal() {
 }
 
 function abrirBtnAddDisciplina() {
+    ativar_loading();
     addElementosNoModal();
     openModal();
+    retirar_loading();
 }
 
 async function btnAddDisciplinaParaOProfessor() {
+    ativar_loading();
     let disciplina = document.getElementById("selectDisciplina");
     let codigoDisciplina = disciplina.value;
     if (codigoDisciplina === "0") {
@@ -250,9 +262,12 @@ async function btnAddDisciplinaParaOProfessor() {
     } else {
         let codigoProfessor = document.getElementById("selectProfessor");
         await adionarDisciplinaParaOProfessor(codigoDisciplina, codigoProfessor.value);
+        let disciplina = await atualizarTabela(codigoDisciplina);
+        adicionarUmaDisciplinaTabela(disciplina);
         removerElementosModal();
-        await addElementosNoModal();
+        addElementosNoModal();
     }
+    retirar_loading();
 }
 
 async function listarDisciplinasSemRelacionamento() {
@@ -274,6 +289,17 @@ async function adionarDisciplinaParaOProfessor(codigoDisciplina, codigoProfessor
         headers: {'Content-Type': 'application/json'}
     });
     return request;
+}
+
+async function atualizarTabela(codigoDisciplina) {
+    let url = `http://localhost:8080/disciplinas/${codigoDisciplina}`;
+    let request = await fetch(url, {
+        method: "GET",
+        headers: {'Content-Type': 'application/json'}
+    });
+    let response = await request.text();
+    let disciplina = await JSON.parse(response);
+    return disciplina;
 }
 
 

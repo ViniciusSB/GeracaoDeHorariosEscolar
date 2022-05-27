@@ -45,16 +45,16 @@ public class ProfessorController implements WebMvcConfigurer {
     }
 
     @PostMapping
-    public void cadastrarProfessor(@RequestBody ObjectNode objectNode) {
-        service.insert(objectNode.get("nome").asText());
+    public Professor cadastrarProfessor(@RequestBody String nome) {
+        return service.insert(nome);
     }
 
     @RequestMapping(method = RequestMethod.PUT)
-    public void atualizarProfessor(@RequestBody ObjectNode objectNode) {
+    public Professor atualizarProfessor(@RequestBody ObjectNode objectNode) {
         Professor p = new Professor();
         p.setNome(objectNode.get("nome").asText());
         p.setCodigo(objectNode.get("codigo").asLong());
-        service.update(p);
+        return service.update(p);
     }
 
     @PostMapping("/horarios")

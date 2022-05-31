@@ -30,6 +30,23 @@ public class HorarioRepository {
             session.close();
         }
     }
+    public List<Record> obterGradeDeHorarios() {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)<-[:HorarioAula]-(h:Horario)" +
+                    " MATCH (t:Turma)<-[:HorarioAula]-(h:Horario)" +
+                    " MATCH (d:Disciplina)<-[:HorarioAula]-(h:Horario)" +
+                    " RETURN d,t,p,h;";
+            Result result = session.run(query);
+            try {
+                List<Record> records = result.list();
+                autorizacao.retornarAutorizacao().close();
+                session.close();
+                return records;
+            } catch (NoSuchRecordException ex) {
+                return null;
+            }
+        }
+    }
 
     public Record gerarGradeDeHorario(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -23,9 +22,9 @@ public class HorarioController implements WebMvcConfigurer {
         return service.getAll();
     }
 
-    @GetMapping("/{id}")
-    public Horario pesquisarHorarioById(@PathVariable Long id) {
-        return service.getById(id);
+    @GetMapping("/obterGradeDeHorarios")
+    public List<Horario> obterGradeDeHorarios(@PathVariable Long id) {
+        return service.obterGradeDeHorarios();
     }
 
     @GetMapping("/pesquisar")
@@ -44,7 +43,7 @@ public class HorarioController implements WebMvcConfigurer {
     }
 
     @PostMapping("/gerarGrade")
-    public List<Horario> cadastrarHorario() {
+    public List<Horario> gerarGradeDeHorarios() {
         return service.gerarGradeDeHorarios();
     }
 
@@ -66,12 +65,12 @@ public class HorarioController implements WebMvcConfigurer {
 
 
     @DeleteMapping("/todos")
-    public void deletarHorario() {
+    public void deletarTodosOsRelGrade() {
         service.deletarTodosOsRelacionamentos();
     }
 
     @DeleteMapping()
-    public void deletarHorario(@RequestBody ObjectNode objectNode) {
+    public void deletarRelGrade(@RequestBody ObjectNode objectNode) {
         service.deletarRelacionamentoHorario(objectNode);
     }
 

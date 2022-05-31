@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,700;1,200;1,800&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/button.css">
+    <link rel="stylesheet" href="../../css/records.css">
+    <link rel="stylesheet" href="../../css/modal.css">
+    <link rel="stylesheet" href="../../css/menuBar.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="../../javascript/horario/gerarHorario.js"></script>
+    <title>Horario</title>
+</head>
+<body>
+
+<!--    Menu Superior-->
+<nav id="navMenuBar">
+    <label for="btn" class="icon">
+        <span class="fa fa-bars"></span>
+    </label>
+    <input type="checkbox" id="btn">
+    <ul>
+        <li>
+            <label for="btn-0" class="show">Turma +</label>
+            <a href="../turma/turma.html">Turma</a>
+            <input type="checkbox" id="btn-0">
+            <ul>
+                <li><a href="../turma/turma.html">Listar</a></li>
+                <li><a href="../turma/gerenciarDisciplina.html">Gerenciar disciplinas</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="../disciplina/disciplina.html">Disciplina</a>
+        </li>
+        <li>
+            <label for="btn-2" class="show">Professor +</label>
+            <a href="../professor/professor.html">Professor</a>
+            <input type="checkbox" id="btn-2">
+            <ul>
+                <li><a href="../professor/professor.html">Listar</a></li>
+                <li><a href="../professor/gerenciarDisciplina.html">Gerenciar disciplinas</a></li>
+                <li><a href="../professor/restricaoHorario.html">Gerenciar restrições</a></li>
+            </ul>
+        </li>
+        <li><a href="../horario/horario.html">Horario</a></li>
+    </ul>
+</nav>
+
+<!--    Titulo-->
+    <header>
+        <h1 class="header-title">Gerar grade de horarios</h1>
+    </header>
+
+<!--    Tabela-->
+    <main id="main">
+        <button type="button" class="button blue mobile" id="gerarGrade">Gerar grade</button>
+        <input type="text" id="inputPesquisar" class="inputPesquisa" placeholder="Pesquisar por descrição">
+        <table class="records" id="tabela">
+            <tr>
+                <th>Horario</th>
+                <th>Professor</th>
+                <th>Disciplina</th>
+                <th>Turma</th>
+                <th>Ação</th>
+            </tr>
+
+
+        </table>
+
+<!--        Modal-->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2>Novo Horario</h2>
+                    <span class="modal-close" id="modalClose">&#10006;</span>
+                </header>
+                <form class="modal-form" id="formModal">
+                    <input type="hidden" id="inputId">
+                    <input type="text" class="modal-field" id="inputDescricao" required placeholder="Descrição do Horario">
+                    <input type="number" class="modal-field" id="inputInicio" required placeholder="Horario de inicio">
+                    <input type="number" class="modal-field" id="inputFim" required placeholder="Horario de finalização">
+                    <input type="number" class="modal-field" id="inputOrdem" required placeholder="Ordem">
+                </form>
+                <footer class="modal-footer">
+                    <button class="button blue" id="btnCancelar">Cancelar</button>
+                    <button class="button green" id="btnSalvar">Salvar</button>
+                </footer>
+            </div>
+        </div>
+    </main>
+
+<!--    Footer-->
+    <footer>
+        Vinícius SB
+    </footer>
+</body>
+</html>

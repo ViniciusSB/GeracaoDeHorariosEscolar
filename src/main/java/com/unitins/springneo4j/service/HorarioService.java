@@ -71,6 +71,17 @@ public class HorarioService {
         return recordToHorarios(records);
     }
 
+    public List<Horario> obterGradeDeHorarios() {
+        List<Record> records = repository.obterGradeDeHorarios();
+        List<Horario> horarios = new ArrayList<>();
+        if (!records.isEmpty()) {
+            for (int i=0;i<records.size();i++) {
+                horarios.add(recordToHorarioCompleto(records.get(i)));
+            }
+        }
+        return horarios;
+    }
+
     public List<Horario> gerarGradeDeHorarios() {
         HashMap<String, Object> parametros = new HashMap<>();
 

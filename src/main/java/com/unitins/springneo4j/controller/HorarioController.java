@@ -23,7 +23,7 @@ public class HorarioController implements WebMvcConfigurer {
     }
 
     @GetMapping("/obterGradeDeHorarios")
-    public List<Horario> obterGradeDeHorarios(@PathVariable Long id) {
+    public List<Horario> obterGradeDeHorarios() {
         return service.obterGradeDeHorarios();
     }
 

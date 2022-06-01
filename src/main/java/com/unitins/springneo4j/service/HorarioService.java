@@ -72,15 +72,55 @@ public class HorarioService {
     }
 
     public List<Horario> obterGradeDeHorarios() {
-        List<Record> records = repository.obterGradeDeHorarios();
+        List<Disciplina> disciplinas = disciplinaService.getAll();
         List<Horario> horarios = new ArrayList<>();
-        if (!records.isEmpty()) {
-            for (int i=0;i<records.size();i++) {
-                horarios.add(recordToHorarioCompleto(records.get(i)));
+        for (Disciplina d: disciplinas) {
+            HashMap<String, Object> parametros = new HashMap<>();
+            parametros.put("codigoDisciplina", d.getCodigo());
+            List<Record> records = repository.obterGradeDeHorarios(parametros);
+            for (Record r: records) {
+                Horario horario = recordToHorarioCompleto(r);
+                horarios.add(horario);
             }
         }
+
+//        addDisciplinasSemGradeNaGrade(disciplinas);
+
         return horarios;
     }
+
+    public void addDisciplinasSemGradeNaGrade(List<Disciplina> disciplinas) {
+        TurmaService turmaService = new TurmaService();
+        ProfessorService professorService = new ProfessorService();
+
+        for (Disciplina d : disciplinas) {
+            int relFaltantes = verificarQtdHorarioRestantes(d.getCodigo());
+            Turma turma = turmaService.descobrirTurmaPelaDisciplina(d.getCodigo());
+            Professor professor = professorService.buscarProfessorPelaDisciplina(d.getCodigo());
+            HashMap<String, Object> parametros = new HashMap<>();
+            parametros.put("codigoTurma", turma.getCodigo());
+            List<Record> records = repository.retornarHorariosDispTurma(parametros);
+            List<Horario> horar = recordToHorarios(records);
+            if (relFaltantes != 0 && relFaltantes <= horar.size()) {
+                for (Horario ho: horar) {
+                    if (!professorService.verificarRestricaoAPartirDoHorario(professor.getCodigo(), ho.getCodigo())) {
+                        HashMap<String, Object> para = new HashMap<>();
+                        para.put("codigoTurma", turma.getCodigo());
+                        para.put("codigoProfessor", professor.getCodigo());
+                        para.put("codigoDisciplina", d.getCodigo());
+                        para.put("codigoHorario", ho.getCodigo());
+                        repository.inserirNaGradeManualmente(para);
+                        relFaltantes--;
+                    }
+                    if (relFaltantes == 0){
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
 
     public List<Horario> gerarGradeDeHorarios() {
         HashMap<String, Object> parametros = new HashMap<>();
@@ -97,7 +137,15 @@ public class HorarioService {
             }
         });
 
+//        addDisciplinasSemGradeNaGrade(disciplinas);
+
         return horarios;
+    }
+
+    public int verificarQtdHorarioRestantes(Long disc) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoDisciplina", disc);
+        return repository.verificarRelHorario(parametros);
     }
 
     public void deletarRelacionamentoHorario(ObjectNode objectNode) {
@@ -117,10 +165,10 @@ public class HorarioService {
         ProfessorService professorService = new ProfessorService();
         TurmaService turmaService = new TurmaService();
 
-        Node nodeProfessor = record.get(4).asNode();
-        Node nodeDisciplina = record.get(0).asNode();
-        Node nodeHorario = record.get(1).asNode();
-        Node nodeTurma = record.get(5).asNode();
+        Node nodeProfessor = (Node) record.asMap().get("p");
+        Node nodeDisciplina = (Node) record.asMap().get("d");
+        Node nodeHorario = (Node) record.asMap().get("h");
+        Node nodeTurma = (Node) record.asMap().get("t");
         Horario horario = nodeToHorario(nodeHorario);
         Professor professor = professorService.nodeToProfessor(nodeProfessor);
         Turma turma = turmaService.nodeToTurma(nodeTurma);

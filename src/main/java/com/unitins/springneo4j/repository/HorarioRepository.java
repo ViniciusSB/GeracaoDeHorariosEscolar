@@ -30,13 +30,65 @@ public class HorarioRepository {
             session.close();
         }
     }
-    public List<Record> obterGradeDeHorarios() {
+    public List<Record> obterGradeDeHorarios(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "MATCH (p:Professor)<-[:HorarioAula]-(h:Horario)" +
                     " MATCH (t:Turma)<-[:HorarioAula]-(h:Horario)" +
                     " MATCH (d:Disciplina)<-[:HorarioAula]-(h:Horario)" +
-                    " RETURN d,t,p,h;";
-            Result result = session.run(query);
+                    " WHERE d.codigo = $codigoDisciplina and (d)<-[:ProfessorDisciplina]-(p) " +
+                    " AND (d)<-[:TurmaDisciplina]-(t) " +
+                    " RETURN d,t,p,h " +
+                    " ORDER BY h.codigo";
+            Result result = session.run(query, parametros);
+            return result.list();
+        }
+    }
+
+    public void inserirNaGradeManualmente(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String url = " MATCH (d:Disciplina) WHERE d.codigo = $codigoDisciplina " +
+                    " MATCH (t:Turma) WHERE t.codigo = $codigoTurma " +
+                    " MATCH (p:Professor) WHERE p.codigo = $codigoProfessor " +
+                    " MATCH (h:Horario) WHERE h.codigo = $codigoHorario " +
+                    " CREATE(h)-[:HorarioAula]->(p) " +
+                    " CREATE(h)-[:HorarioAula]->(t) " +
+                    " CREATE(h)-[:HorarioAula]->(d)" +
+                    " RETURN d;";
+            Result result = session.run(url, parametros);
+            Record record = result.single();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+        }
+    }
+
+    public Integer verificarRelHorario(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String url = " MATCH (d:Disciplina)<-[:HorarioAula]-(h:Horario) " +
+                    " WHERE d.codigo = $codigoDisciplina " +
+                    " WITH d.aulasemanal as qtdAula, count(h) as relac " +
+                    " WHERE relac < qtdAula " +
+                    " RETURN qtdAula - relac";
+            Result result = session.run(url, parametros);
+            try {
+                Record record = result.single();
+                autorizacao.retornarAutorizacao().close();
+                session.close();
+                return record.get(0).asInt();
+            } catch (NoSuchRecordException err) {
+                return 0;
+            }
+        }
+    }
+
+    public List<Record> retornarHorariosDispTurma(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String url = " MATCH (t:Turma)<-[:HorarioAula]-(h:Horario) " +
+                    " WHERE t.codigo = $codigoTurma " +
+                    " WITH COLLECT(h) as horTurma " +
+                    " MATCH (hor:Horario) " +
+                    " WHERE NOT hor in horTurma " +
+                    " RETURN hor;";
+            Result result = session.run(url, parametros);
             try {
                 List<Record> records = result.list();
                 autorizacao.retornarAutorizacao().close();

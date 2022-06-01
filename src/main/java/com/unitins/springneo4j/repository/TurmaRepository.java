@@ -107,4 +107,15 @@ public class TurmaRepository {
             return records;
         }
     }
+
+    public Record descobrirTurmaPelaDisciplina(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (t:Turma)-[:TurmaDisciplina]->(d:Disciplina) WHERE d.codigo = $codigoDisciplina return t;";
+            Result result = session.run(query, parametros);
+            Record record = result.single();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+            return record;
+        }
+    }
 }

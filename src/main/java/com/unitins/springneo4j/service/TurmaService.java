@@ -30,7 +30,12 @@ public class TurmaService {
         repository.inserir(parametros);
     }
 
-
+    public Turma descobrirTurmaPelaDisciplina(Long codigoDisciplina) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoDisciplina", codigoDisciplina);
+        Record record = repository.descobrirTurmaPelaDisciplina(parametros);
+        return recordToTurma(record);
+    }
 
     public Turma getById(Long codigo) {
         HashMap<String, Object> parametros = new HashMap<>();

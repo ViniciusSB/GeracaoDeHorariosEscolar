@@ -81,6 +81,20 @@ public class ProfessorService {
         return disciplinaService.recordToDisciplinas(records);
     }
 
+    public Professor buscarProfessorPelaDisciplina(Long disciplina) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoDisciplina", disciplina);
+        Record record = repository.buscarProfessorPelaDisciplina(parametros);
+        return recordToProfessor(record);
+    }
+
+    public boolean verificarRestricaoAPartirDoHorario(Long codigoProfessor, Long codigoHorario) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoProfessor", codigoProfessor);
+        parametros.put("codigoHorario", codigoHorario);
+        return repository.verificarRestricaoAPartirDoHorario(parametros);
+    }
+
     public List<Horario> horariosRestricaoProfessorById(Long codigoProfessor) {
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", codigoProfessor);

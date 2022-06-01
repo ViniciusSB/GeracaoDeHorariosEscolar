@@ -1,7 +1,7 @@
 'use strict'
 
 window.onload=async function(){
-    document.getElementById('gerarGrade').addEventListener('click', gerarGradeDeHorarios);
+    document.getElementById('gerarGrade').addEventListener('click', funcGerarGradeDeHorarios);
 
     document.getElementById('modalClose').addEventListener('click', closeModal);
 
@@ -36,27 +36,18 @@ function limparCampos() {
     document.getElementById("inputId").value = "";
 }
 
-function carregarHorarios() {
-    fetch("http://localhost:8080/horarios", {
+async function listarGradeHorarios() {
+    let request = await fetch("http://localhost:8080/horarios/obterGradeDeHorarios", {
         method: "GET",
         headers: {'Content-Type': 'application/json'},
         mode: "cors"
-        // body: JSON.stringify(parametros)
-    }).then(function (response) {
-        response.text().then(function (result){
-            var horarios = JSON.parse(result);
-            console.log(horarios);
-            if (horarios.length > 0) {
-                addHorariosTabela(horarios);
-            }
-        })
-    }).catch(function (err) {
-        console.log(err);
-    })
-
+    });
+    let response = await request.text();
+    let horarios = JSON.parse(response);
+    return horarios;
 }
 
-async function carregarDadosGrade() {
+async function gerarGradeHorarios() {
     let url = "http://localhost:8080/horarios/gerarGrade";
     let request = await fetch(url, {
         mode: "cors",
@@ -110,8 +101,8 @@ function deletarTabela() {
     tabela.remove();
 }
 
-async function gerarGradeDeHorarios() {
-    let grade = await carregarDadosGrade();
+async function funcGerarGradeDeHorarios() {
+    let grade = await gerarGradeHorarios();
     deletarTabela();
     criarTabela();
     addGradeNaTabela(grade);
@@ -129,8 +120,8 @@ function addGradeNaTabela(grade) {
             <td>${grade[i].disciplinas[0].nome}</td> 
             <td>${grade[i].turmas[0].nome}</td>
             <td>
-                <button type="button" class="button green" onclick="javascript:editarRegistro(${horarios[i].codigo})">editar</button>
-                <button type="button" class="button red" onclick="javascript:excluirRegistro(${horarios[i].codigo})">excluir</button>
+                <button type="button" class="button green" onclick="javascript:editarRegistro(${grade[i].codigo})">editar</button>
+                <button type="button" class="button red" onclick="javascript:excluirRegistro(${grade[i].codigo})">excluir</button>
             </td>   
         `;
         tabela.appendChild(tr);
@@ -186,7 +177,7 @@ function delay(n){
 async function updateTabela(){
     deletarTabela();
     criarTabela();
-    let grade = await carregarDadosGrade();
+    let grade = await listarGradeHorarios();
     addGradeNaTabela(grade);
 }
 

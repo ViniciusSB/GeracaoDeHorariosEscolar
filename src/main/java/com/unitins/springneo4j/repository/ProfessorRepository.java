@@ -148,6 +148,17 @@ public class ProfessorRepository {
         }
     }
 
+    public Record buscarProfessorPelaDisciplina(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)-[:ProfessorDisciplina]->(d:Disciplina) WHERE d.codigo = $codigoDisciplina RETURN p;";
+            Result result = session.run(query, parametros);
+            Record record = result.single();
+            autorizacao.retornarAutorizacao().close();
+            session.close();
+            return record;
+        }
+    }
+
     public List<Record> buscarHorariosRestricaoDoProfessor(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String query = "MATCH (p:Professor)-[:RprofessorHorario]->(h:Horario) WHERE p.codigo = $codigo RETURN h;";
@@ -156,6 +167,22 @@ public class ProfessorRepository {
             autorizacao.retornarAutorizacao().close();
             session.close();
             return records;
+        }
+    }
+
+    public boolean verificarRestricaoAPartirDoHorario(HashMap<String, Object> parametros) {
+        try (Session session = autorizacao.retornarAutorizacao().session()) {
+            String query = "MATCH (p:Professor)-[:RprofessorHorario]->(h:Horario) WHERE p.codigo = $codigoProfessor AND h.codigo = $codigoHorario RETURN h;";
+            Result result = session.run(query, parametros);
+            try {
+                Record records = result.single();
+                autorizacao.retornarAutorizacao().close();
+                session.close();
+                return records.get(0).asBoolean();
+            } catch (NoSuchRecordException err) {
+                return false;
+            }
+
         }
     }
 

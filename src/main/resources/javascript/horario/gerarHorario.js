@@ -3,11 +3,7 @@
 window.onload=async function(){
     document.getElementById('gerarGrade').addEventListener('click', funcGerarGradeDeHorarios);
 
-    document.getElementById('modalClose').addEventListener('click', closeModal);
-
-    document.getElementById('btnCancelar').addEventListener('click', closeModal);
-
-    document.getElementById('btnSalvar').addEventListener('click', cadastrarHorario);
+    document.getElementById("excluirGrade").addEventListener("click", deletarGrade);
 
     document.getElementById('inputPesquisar').addEventListener('input', async (e) => {
         if (e.currentTarget.value == "") {
@@ -20,22 +16,6 @@ window.onload=async function(){
     await updateTabela();
 }
 
-const openModal = () => document.getElementById('modal')
-    .classList.add('active');
-
-const closeModal = () => {
-    limparCampos();
-    document.getElementById('modal').classList.remove('active');
-}
-
-function limparCampos() {
-    document.getElementById("inputDescricao").value = "";
-    document.getElementById("inputInicio").value = "";
-    document.getElementById("inputFim").value = "";
-    document.getElementById("inputOrdem").value = "";
-    document.getElementById("inputId").value = "";
-}
-
 async function listarGradeHorarios() {
     let request = await fetch("http://localhost:8080/horarios/obterGradeDeHorarios", {
         method: "GET",
@@ -43,8 +23,39 @@ async function listarGradeHorarios() {
         mode: "cors"
     });
     let response = await request.text();
-    let horarios = JSON.parse(response);
-    return horarios;
+    return JSON.parse(response);
+}
+
+async function deletarGrade() {
+    if (window.confirm("Apagar todo a grade existente?")) {
+        await deletarGradeDeHorarios();
+        deletarTabela();
+        let main = document.getElementById("main");
+        let h3 = document.createElement("h3");
+        h3.textContent = "Nenhuma grade gerada";
+        main.appendChild(h3);
+    }
+}
+
+async function listarGradeHorariosPorTurma(codigoTurma) {
+    let request = await fetch(`http://localhost:8080/horarios/obterGradeDeHorariosPorTurma/${codigoTurma}`, {
+        method: "GET",
+        headers: {'Content-Type': 'application/json'},
+        mode: "cors"
+    });
+    let response = await request.text();
+    return JSON.parse(response);
+}
+
+async function listarTurmas() {
+    let request = await fetch("http://localhost:8080/turmas", {
+        method: "GET",
+        headers: {'Content-Type': 'application/json'},
+        mode: "cors"
+        // body: JSON.stringify(parametros)
+    })
+    let response = await request.text();
+    return JSON.parse(response);
 }
 
 async function gerarGradeHorarios() {
@@ -54,183 +65,334 @@ async function gerarGradeHorarios() {
         method: "POST"
     })
     let response = await request.text();
-    let grade = JSON.parse(response);
-    return grade;
+    return JSON.parse(response);
 }
 
-function addHorariosTabela(horarios) {
-    var tabela = document.getElementById("tabela");
-
-    for (let i = 0; i<horarios.length;i++) {
-        let tr = document.createElement("tr");
-
-        tr.innerHTML = `
-            <td hidden>${horarios[i].id}</td>
-            <td>${horarios[i].descricao}</td>
-            <td>${horarios[i].inicio}</td> 
-            <td>${horarios[i].fim}</td> 
-            <td>${horarios[i].ordem}</td>
-            <td>
-                <button type="button" class="button green" onclick="javascript:editarRegistro(${horarios[i].codigo})">editar</button>
-                <button type="button" class="button red" onclick="javascript:excluirRegistro(${horarios[i].codigo})">excluir</button>
-            </td>   
-        `;
-        tabela.appendChild(tr);
-    }
-}
-
-function criarTabela() {
-    var main = document.getElementById("main");
-    var table = document.createElement("table");
-    table.className = "records";
-    table.id = "tabela";
-    table.innerHTML = `
-        <tr>
-            <th>Horario</th>
-            <th>Professor</th>
-            <th>Disciplina</th>
-            <th>Turma</th>
-            <th>Ação</th>
-        </tr>
-    `;
-    main.appendChild(table);
+async function deletarGradeDeHorarios() {
+    let url = "http://localhost:8080/horarios/todos";
+    let request = await fetch(url, {
+        method: "DELETE",
+        mode: "cors"
+    })
 }
 
 function deletarTabela() {
-    var tabela = document.getElementById("tabela");
-    tabela.remove();
+    let tabelas = document.querySelectorAll("#main > table");
+    let h3s = document.querySelectorAll("#main > h3");
+    tabelas.forEach(t => t.remove());
+    h3s.forEach(h => h.remove())
 }
 
 async function funcGerarGradeDeHorarios() {
-    let grade = await gerarGradeHorarios();
+    var resultados = await gerarGradeHorarios();
+    let grade = resultados.gradeDeHorarios;
+    let relatorio = resultados.relatorio;
+    let turmas = await listarTurmas();
     deletarTabela();
-    criarTabela();
-    addGradeNaTabela(grade);
+    await addGradeNaTabela(grade, turmas);
+    let string = "";
+    relatorio.forEach(rel => {
+        string = string.concat(`${rel} \n`);
+        console.log(rel);
+    })
+    alert(string);
 }
 
-function addGradeNaTabela(grade) {
-    var tabela = document.getElementById("tabela");
+function criarTdGradeDeUmaTurma(horario) {
+    let codigoTurma = horario.turmas[0].codigo;
+    let nomeTurma = horario.turmas[0].nome;
+    let nomeProfessor = horario.professores[0].nome;
+    let nomeDisciplina = horario.disciplinas[0].nome;
+    let nomeHorario = horario.descricao;
+    let horInicio = horario.inicio;
+    if (horInicio === 19) {
+        let tds = document.querySelectorAll(`#${nomeTurma}Horario1 > td`);
+        if (horario.descricao.toLowerCase().match("seg")) {
+            let td = tds[0];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <label>${nomeDisciplina}</label>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("ter")) {
+            let td = tds[1];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qua")) {
+            let td = tds[2];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qui")) {
+            let td = tds[3];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("sex")) {
+            let td = tds[4];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+    }
 
-    for (let i = 0; i<grade.length;i++) {
-        let tr = document.createElement("tr");
+    if (horInicio === 20) {
+        let tds = document.querySelectorAll(`#${nomeTurma}Horario2 > td`);
+        if (horario.descricao.toLowerCase().match("seg")) {
+            let td = tds[0];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("ter")) {
+            let td = tds[1];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qua")) {
+            let td = tds[2];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qui")) {
+            let td = tds[3];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("sex")) {
+            let td = tds[4];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+    }
 
-        tr.innerHTML = `
-            <td>${grade[i].descricao}</td>
-            <td>${grade[i].professores[0].nome}</td> 
-            <td>${grade[i].disciplinas[0].nome}</td> 
-            <td>${grade[i].turmas[0].nome}</td>
-            <td>
-                <button type="button" class="button green" onclick="javascript:editarRegistro(${grade[i].codigo})">editar</button>
-                <button type="button" class="button red" onclick="javascript:excluirRegistro(${grade[i].codigo})">excluir</button>
-            </td>   
+    if (horInicio === 21) {
+        let tds = document.querySelectorAll(`#${nomeTurma}Horario3 > td`);
+        if (horario.descricao.toLowerCase().match("seg")) {
+            let td = tds[0];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("ter")) {
+            let td = tds[1];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qua")) {
+            let td = tds[2];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qui")) {
+            let td = tds[3];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("sex")) {
+            let td = tds[4];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+    }
+
+    if (horInicio === 22) {
+        let tds = document.querySelectorAll(`#${nomeTurma}Horario4 > td`);
+        if (horario.descricao.toLowerCase().match("seg")) {
+            let td = tds[0];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("ter")) {
+            let td = tds[1];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qua")) {
+            let td = tds[2];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("qui")) {
+            let td = tds[3];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+        if (horario.descricao.toLowerCase().match("sex")) {
+            let td = tds[4];
+            td.innerHTML = `
+                <label>${nomeProfessor}</label>
+                <br>
+                <label>${nomeDisciplina}</label>
+                <br>
+                <label>${nomeHorario}</label>
+            `;
+        }
+    }
+}
+
+async function addGradeNaTabela(grade, turmas) {
+    let main = document.getElementById("main");
+
+    for (let i = 0; i < turmas.length; i++) {
+        let h3 = document.createElement("h3");
+        h3.textContent = turmas[i].nome;
+        let tabela = document.createElement("table");
+        tabela.id = `tabelaTurma${turmas[i].codigo}`;
+        tabela.className = "records";
+        tabela.innerHTML = `
+                <tr id="tituloTabela${turmas[i].codigo}">
+                    <th>Segunda</th>
+                    <th>Terça</th>
+                    <th>Quarta</th>
+                    <th>Quinta</th>
+                    <th>Sexta</th>
+                </tr>
+                
+                <tr id="${turmas[i].nome}Horario1">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                
+                <tr id="${turmas[i].nome}Horario2">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                
+                <tr id="${turmas[i].nome}Horario3">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                
+                <tr id="${turmas[i].nome}Horario4">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
         `;
-        tabela.appendChild(tr);
-    }
-}
-
-async function cadastrarHorario() {
-    let formModal = document.getElementById("formModal");
-    if (formModal.reportValidity()) {
-        let descricao = document.getElementById("inputDescricao");
-        let inicio = document.getElementById("inputInicio");
-        let fim = document.getElementById("inputFim");
-        let ordem = document.getElementById("inputOrdem");
-        let id = document.getElementById("inputId");
-        let parametros = {
-            "descricao": descricao.value,
-            "inicio": inicio.value,
-            "fim": fim.value,
-            "ordem": ordem.value
-        }
-
-        //incluir
-        if (id.value == "") {
-            let request = new XMLHttpRequest();
-            request.open("POST", "http://localhost:8080/horarios");
-            request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            request.send(JSON.stringify(parametros));
-            await delay(0.6);
-        } else if (id.value != "") { //Atualizar (o input id armazena o codigo do objeto)
-            parametros.codigo = id.value;
-            fetch(`http://localhost:8080/horarios`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json'},
-                body: JSON.stringify(parametros)
-            });
-            await delay(0.6);
-        }
-
-        limparCampos();
-        updateTabela();
-        closeModal();
-        console.log(id.value);
+        main.appendChild(h3);
+        main.appendChild(tabela);
     }
 
-}
+    for (let i = 0; i < turmas.length; i++) {
 
-function delay(n){
-    return new Promise(function(resolve){
-        setTimeout(resolve,n*1000);
-    });
+        let horarios = await listarGradeHorariosPorTurma(turmas[i].codigo);
+        for (let i=0; i<horarios.length; i++) {
+            criarTdGradeDeUmaTurma(horarios[i]);
+        }
+    }
 }
 
 async function updateTabela(){
     deletarTabela();
-    criarTabela();
     let grade = await listarGradeHorarios();
-    addGradeNaTabela(grade);
-}
-
-function editarRegistro(codigo) {
-    openModal();
-    let url = `http://localhost:8080/horarios/${codigo}`;
-    fetch(url, {
-        method: "GET",
-        headers: {'Content-Type': 'application/json'},
-    }).then(function (response) {
-        response.text().then(function (result){
-            let horario = JSON.parse(result);
-            console.log(horario);
-            document.getElementById("inputDescricao").value = horario.descricao;
-            document.getElementById("inputInicio").value = horario.inicio;
-            document.getElementById("inputFim").value = horario.fim;
-            document.getElementById("inputOrdem").value = horario.ordem;
-            document.getElementById("inputId").value = horario.codigo;
-        })
-    }).catch(function (err) {
-        console.log(err);
-    })
-}
-
-function excluirRegistro(codigo) {
-    var resposta = window.confirm("Deseja realmente excluir esse registro?");
-    if (resposta) {
-        let url = `http://localhost:8080/horarios/${codigo}`;
-        fetch(url, {
-            method: "DELETE",
-            headers: {'Content-Type': 'application/json'},
-        }).then(function (response) {
-            updateTabela();
-        }).catch(function (err) {
-            console.log(err);
-        })
+    if (grade.length > 0) {
+        let turmas = await listarTurmas();
+        await addGradeNaTabela(grade, turmas);
+    } else {
+        let main = document.getElementById("main");
+        let h3 = document.createElement("h3");
+        h3.textContent = "Nenhuma grade gerada";
+        main.appendChild(h3);
     }
-}
-
-function pesquisarHorario(campo) {
-    let url = `http://localhost:8080/horarios/pesquisar?nome=${campo}`;
-    fetch(url, {
-        method: "GET",
-        headers: {'Content-Type': 'application/json'},
-    }).then(function (response) {
-        response.text().then(function (result) {
-            let dados = JSON.parse(result);
-            console.log(dados);
-            deletarTabela();
-            criarTabela();
-            addHorariosTabela(dados);
-        })
-    }).catch(function (err) {
-        console.log(err);
-    })
 }

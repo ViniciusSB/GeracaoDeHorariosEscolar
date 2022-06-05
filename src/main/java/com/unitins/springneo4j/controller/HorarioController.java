@@ -1,6 +1,7 @@
 package com.unitins.springneo4j.controller;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.unitins.springneo4j.model.Disciplina;
 import com.unitins.springneo4j.model.Horario;
 import com.unitins.springneo4j.service.HorarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -27,6 +29,11 @@ public class HorarioController implements WebMvcConfigurer {
         return service.obterGradeDeHorarios();
     }
 
+    @GetMapping("/obterGradeDeHorariosPorTurma/{codigo}")
+    public List<Horario> obterGradeDeHorariosPorTurma(@PathVariable Long codigo) {
+        return service.obterGradeDeHorariosPorTurma(codigo);
+    }
+
     @GetMapping("/pesquisar")
     public List<Horario> pesquisarHorarioPorNome(@RequestParam String nome) {
         return service.searchByName(nome);
@@ -43,7 +50,8 @@ public class HorarioController implements WebMvcConfigurer {
     }
 
     @PostMapping("/gerarGrade")
-    public List<Horario> gerarGradeDeHorarios() {
+    public HashMap<String, Object> gerarGradeDeHorarios() {
+        service.numTentativasGrade = 0;
         return service.gerarGradeDeHorarios();
     }
 

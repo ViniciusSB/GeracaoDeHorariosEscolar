@@ -8,11 +8,12 @@
     height: 50px;
     background-color: var(--primary-color);
     padding-left: 20px;
-    font-size: 1.2rem;    
+    font-size: 1.2rem;
 }
 .records td{
     height: 50px;
     padding-left: 20px;
+    border: solid 1px var(--primary-color);
 }
 
 .records th:last-child,

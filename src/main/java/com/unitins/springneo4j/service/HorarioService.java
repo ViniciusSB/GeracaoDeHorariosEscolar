@@ -10,15 +10,14 @@ import org.neo4j.driver.Record;
 import org.neo4j.driver.types.Node;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class HorarioService {
 
     HorarioRepository repository = new HorarioRepository();
     DisciplinaService disciplinaService = new DisciplinaService();
+    public Integer numTentativasGrade = 0;
 
     public List<Horario> getAll() {
         List<Record> records = repository.listarTodos();
@@ -72,11 +71,12 @@ public class HorarioService {
     }
 
     public List<Horario> obterGradeDeHorarios() {
-        List<Disciplina> disciplinas = disciplinaService.getAll();
+        TurmaService turmaService = new TurmaService();
+        List<Turma> turmas = turmaService.getAll();
         List<Horario> horarios = new ArrayList<>();
-        for (Disciplina d: disciplinas) {
+        for (Turma t: turmas) {
             HashMap<String, Object> parametros = new HashMap<>();
-            parametros.put("codigoDisciplina", d.getCodigo());
+            parametros.put("codigoDisciplina", t.getCodigo());
             List<Record> records = repository.obterGradeDeHorarios(parametros);
             for (Record r: records) {
                 Horario horario = recordToHorarioCompleto(r);
@@ -86,6 +86,18 @@ public class HorarioService {
 
 //        addDisciplinasSemGradeNaGrade(disciplinas);
 
+        return horarios;
+    }
+
+    public List<Horario> obterGradeDeHorariosPorTurma(Long codigoTurma) {
+        HashMap<String, Object> parametros = new HashMap<>();
+        parametros.put("codigoTurma", codigoTurma);
+        List<Horario> horarios = new ArrayList<>();
+        List<Record> records = repository.obterGradeDeHorariosPorTurma(parametros);
+        for (Record r: records) {
+            Horario horario = recordToHorarioCompleto(r);
+            horarios.add(horario);
+        }
         return horarios;
     }
 
@@ -122,11 +134,15 @@ public class HorarioService {
 
 
 
-    public List<Horario> gerarGradeDeHorarios() {
+    public HashMap<String, Object> gerarGradeDeHorarios() {
+        numTentativasGrade += 1;
         HashMap<String, Object> parametros = new HashMap<>();
-
+        TurmaService turmaService = new TurmaService();
+        ProfessorService professorService = new ProfessorService();
         List<Disciplina> disciplinas = disciplinaService.getAll();
         List<Horario> horarios = new ArrayList<>();
+        //Deixar a lista com ordem aleatoria
+        Collections.shuffle(disciplinas);
         disciplinas.forEach(disciplina -> {
             for (int i=0;i<disciplina.getAulaSemanal(); i++) {
                 parametros.put("codigoDisciplina", disciplina.getCodigo());
@@ -137,9 +153,60 @@ public class HorarioService {
             }
         });
 
+        List<String> relatorio = new ArrayList<>();
+        for (Disciplina d : disciplinas) {
+            int relFaltantes = verificarQtdHorarioRestantes(d.getCodigo());
+            if (relFaltantes != 0) {
+                String observacao = "A disciplina " + d.getNome() + " ficou faltando " + relFaltantes + " horarios dos " + d.getAulaSemanal() + " disponiveis";
+                relatorio.add(observacao);
+            }
+        }
+
+        List<Record> records = repository.retornarDisciplinasSemNenhumRelacionamento();
+        for (Record r : records) {
+            Disciplina disciplina = disciplinaService.recordToDisciplina(r);
+            HashMap<String, Object> param = new HashMap<>();
+            param.put("codigoDisciplina", disciplina.getCodigo());
+            Record recProfessor = repository.descobrirQualProfMinistraUmaDisc(param);
+            Record recTurma = repository.descobrirQualTurmaDaDisc(param);
+            Professor p = professorService.recordToProfessor(recProfessor);
+            Turma t = turmaService.recordToTurma(recTurma);
+            param.put("codigoTurma", t.getCodigo());
+            param.put("codigoProfessor", p.getCodigo());
+            List<Record> recHorariosDispTurma = repository.retornarHorariosDispTurma(param);
+            List<Record> recHorariosOcupadosProfessor = repository.retornarHorariosOcupadosProfessor(param);
+            List<Horario> horarioDispTurma = recordToHorarios(recHorariosDispTurma);
+            List<Horario> horarioOcupadosProfessor = recordToHorarios(recHorariosOcupadosProfessor);
+
+            forHtr: for (Horario htr: horarioDispTurma) {
+                for (Horario h: horarioOcupadosProfessor) {
+                    if (Objects.equals(htr.getCodigo(), h.getCodigo())) {
+                        String obs = "Horarios para a disciplina " +disciplina.getNome()+" não gerados, o professor "+p.getNome()+" não pode estar em dois lugares ao mesmo tempo. Turma da disciplina: " + disciplina.getNome();
+                        relatorio.add(obs);
+                        break forHtr;
+                    }
+                }
+            }
+        }
+
+        if (relatorio.size() > 0) {
+            relatorio = new ArrayList<>();
+            regerarGrade();
+        }
+
+        relatorio.add("Grade gerada com sucesso");
+        relatorio.add("Número de tentativas: " +numTentativasGrade);
+        HashMap<String, Object> resultados = new HashMap<>();
+        resultados.put("relatorio", relatorio);
+        resultados.put("gradeDeHorarios", horarios);
 //        addDisciplinasSemGradeNaGrade(disciplinas);
 
-        return horarios;
+        return resultados;
+    }
+
+    public void regerarGrade() {
+        deletarTodosOsRelacionamentos();
+        gerarGradeDeHorarios();
     }
 
     public int verificarQtdHorarioRestantes(Long disc) {

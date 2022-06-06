@@ -7,7 +7,6 @@ import org.neo4j.driver.Session;
 import org.neo4j.driver.exceptions.NoSuchRecordException;
 import org.neo4j.driver.exceptions.ResultConsumedException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,20 +39,6 @@ public class HorarioRepository {
                     " AND (d)<-[:TurmaDisciplina]-(t) " +
                     " RETURN d,t,p,h " +
                     " ORDER BY h.codigo";
-            Result result = session.run(query, parametros);
-            return result.list();
-        }
-    }
-
-    public List<Record> obterGradeDeHorariosPorTurma(HashMap<String, Object> parametros) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (p:Professor)<-[:HorarioAula]-(h:Horario)" +
-                    " MATCH (t:Turma)<-[:HorarioAula]-(h:Horario)" +
-                    " MATCH (d:Disciplina)<-[:HorarioAula]-(h:Horario)" +
-                    " WHERE t.codigo = $codigoTurma and (d)<-[:ProfessorDisciplina]-(p) " +
-                    " AND (d)<-[:TurmaDisciplina]-(t) " +
-                    " RETURN d,t,p,h " +
-                    " ORDER BY h.ordem";
             Result result = session.run(query, parametros);
             return result.list();
         }
@@ -95,25 +80,6 @@ public class HorarioRepository {
         }
     }
 
-    public List<Record> retornarDisciplinasSemNenhumRelacionamento() {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String url = " MATCH (d:Disciplina)<-[:HorarioAula]-(h:Horario) " +
-                    " WITH COLLECT(d) as discRel " +
-                    " match (disc:Disciplina) " +
-                    " where not disc in discRel " +
-                    " RETURN disc;";
-            Result result = session.run(url);
-            try {
-                List<Record> records = result.list();
-                autorizacao.retornarAutorizacao().close();
-                session.close();
-                return records;
-            } catch (NoSuchRecordException err) {
-                return new ArrayList<>();
-            }
-        }
-    }
-
     public List<Record> retornarHorariosDispTurma(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
             String url = " MATCH (t:Turma)<-[:HorarioAula]-(h:Horario) " +
@@ -128,57 +94,6 @@ public class HorarioRepository {
                 autorizacao.retornarAutorizacao().close();
                 session.close();
                 return records;
-            } catch (NoSuchRecordException ex) {
-                return null;
-            }
-        }
-    }
-
-    public List<Record> retornarHorariosOcupadosProfessor(HashMap<String, Object> parametros) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String url = " MATCH (p:Professor)<-[:HorarioAula]-(h:Horario) " +
-                    " WHERE p.codigo = $codigoProfessor " +
-                    " RETURN h;";
-            Result result = session.run(url, parametros);
-            try {
-                List<Record> records = result.list();
-                autorizacao.retornarAutorizacao().close();
-                session.close();
-                return records;
-            } catch (NoSuchRecordException ex) {
-                return null;
-            }
-        }
-    }
-
-    public Record descobrirQualProfMinistraUmaDisc(HashMap<String, Object> parametros) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String url = " MATCH (p:Professor)-[:ProfessorDisciplina]->(d:Disciplina) " +
-                    " WHERE d.codigo = $codigoDisciplina " +
-                    " RETURN p;";
-            Result result = session.run(url, parametros);
-            try {
-                Record record = result.single();
-                autorizacao.retornarAutorizacao().close();
-                session.close();
-                return record;
-            } catch (NoSuchRecordException ex) {
-                return null;
-            }
-        }
-    }
-
-    public Record descobrirQualTurmaDaDisc(HashMap<String, Object> parametros) {
-        try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String url = " MATCH (d:Disciplina)<-[:TurmaDisciplina]-(t:Turma) " +
-                    " WHERE d.codigo = $codigoDisciplina " +
-                    " RETURN t;";
-            Result result = session.run(url, parametros);
-            try {
-                Record record = result.single();
-                autorizacao.retornarAutorizacao().close();
-                session.close();
-                return record;
             } catch (NoSuchRecordException ex) {
                 return null;
             }

@@ -34,12 +34,14 @@ const openModal = () => document.getElementById('modal')
     .classList.add('active');
 
 const closeModal = async () => {
+    ativar_loading();
     document.getElementById('modal').classList.remove('active');
     removerElementosModal();
     deletarTabela();
     criarTabela();
     let horarios = await carregarHorariosRestricaoProfessor(document.getElementById("selectProfessor").value);
     montarHorariosNaTabela(horarios);
+    retirar_loading();
 }
 
 async function carregarHorariosRestricaoProfessor(codigoProfessor) {
@@ -59,6 +61,7 @@ function montarHorariosNaTabela(horarios) {
     for (let i=0; i<horarios.length; i++) {
         let tr = document.createElement("tr");
         tr.innerHTML = `
+            <td hidden>${horarios[i].codigo}</td>
             <td>${horarios[i].descricao}</td>
             <td>${horarios[i].inicio}</td>
             <td>${horarios[i].fim}</td>
@@ -69,7 +72,9 @@ function montarHorariosNaTabela(horarios) {
 }
 
 async function deletarHorarioProfessor(codigoHorario) {
+    console.log(codigoHorario);
     if (confirm("Deseja realmente exluir esse registro?")) {
+        ativar_loading();
         let select = document.getElementById("selectProfessor");
         let url = `http://localhost:8080/professores/deleteHorario?codigoProfessor=${select.value}&codigoHorario=${codigoHorario}`;
         await fetch(url, {
@@ -77,15 +82,27 @@ async function deletarHorarioProfessor(codigoHorario) {
             method: "DELETE"
         }).then(async result => {
             if (result.status === 200) {
-                await updateTabela();
+                let trs = document.querySelectorAll("#tabela > tr");
+                trs.forEach(tr => {
+                    if (parseInt(tr.children[0].textContent) === codigoHorario) {
+                        tr.remove();
+                    }
+                })
+                for (let i=0; i<restricoesProfessor.length; i++) {
+                    if (restricoesProfessor[i].codigo === codigoHorario) {
+                        restricoesProfessor.splice(i, 1);
+                    }
+                }
             }
         }).catch(function (err) {
             console.log(err);
         })
+        retirar_loading();
     }
 }
 
 async function updateTabela(){
+    ativar_loading();
     deletarTabela();
     deletarInfoProfessor();
     criarTabela();
@@ -93,6 +110,7 @@ async function updateTabela(){
     addBotaoAddDHorario();
     addInfoProfessor();
     montarHorariosNaTabela(horarios);
+    retirar_loading();
 }
 
 function addInfoProfessor() {
@@ -127,6 +145,7 @@ function criarTabela() {
     table.id = "tabela";
     table.innerHTML = `
         <tr>
+            <th hidden>Codigo</th>
             <th>Descricao</th>
             <th>Início</th>
             <th>Fim</th>
@@ -163,10 +182,12 @@ async function listarProfessor() {
 }
 
 function limparCampos() {
+    ativar_loading();
     removerBotaoAddHorario();
     deletarInfoProfessor();
     deletarTabela();
     criarTabela();
+    retirar_loading();
 }
 
 function addBotaoAddDHorario() {
@@ -235,8 +256,10 @@ async function salvarRestricaoHorario() {
 }
 
 async function salvarHorarioProfessor() {
+    ativar_loading();
     await salvarRestricaoHorario();
     await closeModal();
+    retirar_loading();
 }
 
 async function listarTodosOsHorarios() {

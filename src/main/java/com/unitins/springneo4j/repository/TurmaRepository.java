@@ -24,12 +24,14 @@ public class TurmaRepository {
         }
     }
 
-    public void inserir(HashMap<String, Object> parametros) {
+    public Record inserir(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "CREATE (t:Turma {codigo: $codigo, nome: $nome})";
+            String query = "CREATE (t:Turma {codigo: $codigo, nome: $nome}) return t;";
             Result result = session.run(query, parametros);
+            Record record = result.single();
             autorizacao.retornarAutorizacao().close();
             session.close();
+            return record;
         }
     }
 
@@ -77,12 +79,14 @@ public class TurmaRepository {
         }
     }
 
-    public void atualizar(HashMap<String, Object> parametros) {
+    public Record atualizar(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "MATCH (t:Turma) WHERE t.codigo = $codigo SET t.nome = $nome;";
-            session.run(query, parametros);
+            String query = "MATCH (t:Turma) WHERE t.codigo = $codigo SET t.nome = $nome RETURN t;";
+            Result result = session.run(query, parametros);
+            Record record = result.single();
             autorizacao.retornarAutorizacao().close();
             session.close();
+            return record;
         }
     }
 

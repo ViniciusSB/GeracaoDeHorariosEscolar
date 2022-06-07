@@ -11,13 +11,28 @@ window.onload=function(){
 
     document.getElementById('inputPesquisar').addEventListener('input', (e) => {
         if (e.currentTarget.value == "") {
+            ativar_loading();
             updateTabela();
+            retirar_loading();
         } else {
             pesquisarHorario(e.currentTarget.value);
         }
     })
 
     updateTabela();
+    retirar_loading();
+}
+
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
+}
+
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
 }
 
 const openModal = () => document.getElementById('modal')
@@ -63,7 +78,7 @@ function addHorariosTabela(horarios) {
         let tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td hidden>${horarios[i].id}</td>
+            <td hidden>${horarios[i].codigo}</td>
             <td>${horarios[i].descricao}</td>
             <td>${horarios[i].inicio}</td> 
             <td>${horarios[i].fim}</td> 
@@ -75,6 +90,26 @@ function addHorariosTabela(horarios) {
         `;
         tabela.appendChild(tr);
     }
+}
+
+function addUmHorarioNaTabela(horario) {
+    var tabela = document.getElementById("tabela");
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+            <td hidden>${horario.codigo}</td>
+            <td>${horario.descricao}</td>
+            <td>${horario.inicio}</td> 
+            <td>${horario.fim}</td> 
+            <td>${horario.ordem}</td>
+            <td>
+                <button type="button" class="button green" onclick="javascript:editarRegistro(${horario.codigo})">editar</button>
+                <button type="button" class="button red" onclick="javascript:excluirRegistro(${horario.codigo})">excluir</button>
+            </td>   
+        `;
+    tabela.appendChild(tr);
+
 }
 
 function criarTabela() {
@@ -103,6 +138,7 @@ function deletarTabela() {
 async function cadastrarHorario() {
     let formModal = document.getElementById("formModal");
     if (formModal.reportValidity()) {
+        ativar_loading();
         let descricao = document.getElementById("inputDescricao");
         let inicio = document.getElementById("inputInicio");
         let fim = document.getElementById("inputFim");
@@ -117,25 +153,42 @@ async function cadastrarHorario() {
 
         //incluir
         if (id.value == "") {
-            let request = new XMLHttpRequest();
-            request.open("POST", "http://localhost:8080/horarios");
-            request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            request.send(JSON.stringify(parametros));
-            await delay(0.6);
+            let request = await fetch("http://localhost:8080/horarios", {
+                mode: "cors",
+                method: "POST",
+                headers: { 'Content-Type': 'application/json'},
+                body: JSON.stringify(parametros)
+            }).then(function (response) {
+                response.text().then(function (text) {
+                    let horario = JSON.parse(text);
+                    console.log(horario);
+                    addUmHorarioNaTabela(horario);
+                    limparCampos();
+                    closeModal();
+                    retirar_loading();
+                })
+            })
         } else if (id.value != "") { //Atualizar (o input id armazena o codigo do objeto)
             parametros.codigo = id.value;
-            fetch(`http://localhost:8080/horarios`, {
+            let request = await fetch(`http://localhost:8080/horarios`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json'},
                 body: JSON.stringify(parametros)
+            }).then(function () {
+                let trs = document.querySelectorAll("#tabela > tr");
+                trs.forEach(tr => {
+                    if (parseInt(tr.children[0].textContent) === parseInt(id.value)) {
+                        tr.children[1].textContent = descricao.value;
+                        tr.children[2].textContent = inicio.value;
+                        tr.children[3].textContent = fim.value;
+                        tr.children[4].textContent = ordem.value;
+                    }
+                })
+                limparCampos();
+                closeModal();
+                retirar_loading();
             });
-            await delay(0.6);
         }
-
-        limparCampos();
-        updateTabela();
-        closeModal();
-        console.log(id.value);
     }
 
 }
@@ -176,14 +229,22 @@ function editarRegistro(codigo) {
 function excluirRegistro(codigo) {
     var resposta = window.confirm("Deseja realmente excluir esse registro?");
     if (resposta) {
+        ativar_loading();
         let url = `http://localhost:8080/horarios/${codigo}`;
         fetch(url, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
         }).then(function (response) {
-            updateTabela();
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === codigo) {
+                    tr.remove();
+                }
+            })
+            retirar_loading();
         }).catch(function (err) {
             console.log(err);
+            retirar_loading();
         })
     }
 }

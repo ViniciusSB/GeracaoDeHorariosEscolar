@@ -30,7 +30,7 @@ public class DisciplinaService {
         return recordToDisciplinas(records);
     }
 
-    public void insert(Disciplina disciplina) {
+    public Disciplina insert(Disciplina disciplina) {
         Integer codigo = retornarMaiorCodigo();
 
         HashMap<String, Object> parametros = new HashMap<>();
@@ -38,7 +38,8 @@ public class DisciplinaService {
         parametros.put("nome", disciplina.getNome());
         parametros.put("aulasemanal", disciplina.getAulaSemanal());
         parametros.put("ch", disciplina.getCargaHoraria());
-        repository.inserir(parametros);
+        Record record = repository.inserir(parametros);
+        return recordToDisciplina(record);
     }
 
     public void insertDisciplinaTurma(Integer codigoDisciplina, Integer codigoTurma) {

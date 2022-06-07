@@ -18,6 +18,19 @@ window.onload=function(){
     })
 
     updateTabela();
+    retirar_loading();
+}
+
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
+}
+
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
 }
 
 const openModal = () => document.getElementById('modal')
@@ -62,7 +75,7 @@ function addDisciplinasTabela(disciplinas) {
         let tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td hidden>${disciplinas[i].id}</td>
+            <td hidden>${disciplinas[i].codigo}</td>
             <td>${disciplinas[i].nome}</td>
             <td>${disciplinas[i].aulaSemanal}</td> 
             <td>${disciplinas[i].cargaHoraria}</td> 
@@ -73,6 +86,24 @@ function addDisciplinasTabela(disciplinas) {
         `;
         tabela.appendChild(tr);
     }
+}
+
+function addUmaDisciplinaNaTabela(disciplina) {
+    let tabela = document.getElementById("tabela");
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+            <td hidden>${disciplina.codigo}</td>
+            <td>${disciplina.nome}</td>
+            <td>${disciplina.aulaSemanal}</td> 
+            <td>${disciplina.cargaHoraria}</td> 
+            <td>
+                <button type="button" class="button green" onclick="javascript:editarRegistro(${disciplina.codigo})">editar</button>
+                <button type="button" class="button red" onclick="javascript:excluirRegistro(${disciplina.codigo})">excluir</button>
+            </td>   
+        `;
+    tabela.appendChild(tr);
 }
 
 function criarTabela() {
@@ -98,6 +129,7 @@ function deletarTabela() {
 }
 
 async function cadastrarDisciplina() {
+    ativar_loading();
     let formModal = document.getElementById("formModal");
     if (formModal.reportValidity()) {
         let nome = document.getElementById("inputNome");
@@ -111,34 +143,43 @@ async function cadastrarDisciplina() {
         }
 
         //incluir
-        if (nome.value.length > 0 && id.value == "") {
-            let request = new XMLHttpRequest();
-            request.open("POST", "http://localhost:8080/disciplinas");
-            request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            request.send(JSON.stringify(parametros));
-            await delay(0.6);
+        if (nome.value.length > 0 && id.value === "") {
+            let request = await fetch("http://localhost:8080/disciplinas", {
+                method: "POST",
+                mode: "cors",
+                headers: { 'Content-Type': 'application/json'},
+                body: JSON.stringify(parametros)
+            }).then(async function (reponse) {
+                await reponse.text().then(function (text) {
+                    let disciplina = JSON.parse(text);
+                    addUmaDisciplinaNaTabela(disciplina);
+                    closeModal();
+                    retirar_loading();
+                })
+            })
         } else if (nome.value.length > 0 && id.value != "") { //Atualizar (o input id armazena o codigo do objeto)
             parametros.codigo = id.value;
-            fetch(`http://localhost:8080/disciplinas`, {
+            let request = await fetch(`http://localhost:8080/disciplinas`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json'},
                 body: JSON.stringify(parametros)
+            }).then(function () {
+                let trs = document.querySelectorAll("#tabela > tr");
+                let inputs = document.querySelectorAll("#formModal > input");
+                trs.forEach(tr => {
+                    if (parseInt(tr.children[0].textContent) === parseInt(inputs[0].value)) {
+                        tr.children[1].textContent = nome.value;
+                        tr.children[2].textContent = ch.value;
+                        tr.children[3].textContent = aulasemanal.value;
+                    }
+                })
+                closeModal();
+                retirar_loading();
             });
-            await delay(0.6);
         }
 
-        limparCampos();
-        updateTabela();
-        closeModal();
-        console.log(id.value);
     }
 
-}
-
-function delay(n){
-    return new Promise(function(resolve){
-        setTimeout(resolve,n*1000);
-    });
 }
 
 function updateTabela(){
@@ -148,6 +189,7 @@ function updateTabela(){
 }
 
 function editarRegistro(codigo) {
+    ativar_loading();
     openModal();
     let url = `http://localhost:8080/disciplinas/${codigo}`;
     fetch(url, {
@@ -165,20 +207,28 @@ function editarRegistro(codigo) {
     }).catch(function (err) {
         console.log(err);
     })
+    retirar_loading();
 }
 
-function excluirRegistro(codigo) {
+async function excluirRegistro(codigo) {
     var resposta = window.confirm("Deseja realmente excluir esse registro?");
     if (resposta) {
+        ativar_loading();
         let url = `http://localhost:8080/disciplinas/${codigo}`;
-        fetch(url, {
+        await fetch(url, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
         }).then(function (response) {
-            updateTabela();
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === codigo) {
+                    tr.remove();
+                }
+            })
         }).catch(function (err) {
             console.log(err);
         })
+        retirar_loading();
     }
 }
 

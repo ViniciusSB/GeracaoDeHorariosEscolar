@@ -43,12 +43,14 @@ public class DisciplinaRepository {
     }
 
 
-    public void inserir(HashMap<String, Object> parametros) {
+    public Record inserir(HashMap<String, Object> parametros) {
         try (Session session = autorizacao.retornarAutorizacao().session()) {
-            String query = "CREATE (d:Disciplina {codigo: $codigo, nome: $nome, ch: $ch, aulasemanal: $aulasemanal})";
+            String query = "CREATE (d:Disciplina {codigo: $codigo, nome: $nome, ch: $ch, aulasemanal: $aulasemanal}) RETURN d;";
             Result result = session.run(query, parametros);
+            Record record = result.single();
             autorizacao.retornarAutorizacao().close();
             session.close();
+            return record;
         }
     }
 

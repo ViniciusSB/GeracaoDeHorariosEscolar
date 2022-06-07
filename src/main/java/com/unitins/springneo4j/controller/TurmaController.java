@@ -39,16 +39,16 @@ public class TurmaController implements WebMvcConfigurer {
     }
 
     @PostMapping()
-    public void cadastrarTurma(@RequestBody ObjectNode objectNode) {
-        service.insert(objectNode.get("nome").asText());
+    public Turma cadastrarTurma(@RequestBody String nome) {
+        return service.insert(nome);
     }
 
     @RequestMapping(method = RequestMethod.PUT)
-    public void atualizarTurma(@RequestBody ObjectNode objectNode) {
+    public Turma atualizarTurma(@RequestBody ObjectNode objectNode) {
         Turma t = new Turma();
         t.setNome(objectNode.get("nome").asText());
         t.setCodigo(objectNode.get("codigo").asLong());
-        service.update(t);
+        return service.update(t);
     }
 
     @DeleteMapping("/{id}")

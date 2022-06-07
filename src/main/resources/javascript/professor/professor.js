@@ -121,9 +121,9 @@ function deletarTabela() {
 }
 
 async function cadastrarProfessor() {
-    ativar_loading();
     let formModal = document.getElementById("formModal");
     if (formModal.reportValidity()) {
+        ativar_loading();
         let nome = document.getElementById("inputNome");
         let id = document.getElementById("inputId");
         let parametros = {
@@ -132,7 +132,6 @@ async function cadastrarProfessor() {
 
         //incluir
         if (nome.value.length > 0 && id.value === "") {
-            let url = "http://localhost:8080/professores";
             let request = await fetch(`http://localhost:8080/professores`, {
                 method: 'POST',
                 mode: "cors",
@@ -207,7 +206,12 @@ async function excluirRegistro(codigo) {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
         }).then(async function (response) {
-            await updateTabela();
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === codigo) {
+                    tr.remove();
+                }
+            })
         }).catch(function (err) {
             console.log(err);
         })

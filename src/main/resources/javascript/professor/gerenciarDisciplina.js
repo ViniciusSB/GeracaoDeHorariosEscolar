@@ -146,7 +146,7 @@ function adicionarDisciplinasTabela(disciplinas) {
     for (let i=0; i<disciplinas.length; i++) {
         let tr = document.createElement("tr");
         tr.innerHTML = `
-            <td hidden>${disciplinas[i].id}</td>
+            <td hidden>${disciplinas[i].codigo}</td>
             <td>${disciplinas[i].nome}</td>
             <td><button type="button" class="button red" onclick="excluirDisciplina(${disciplinas[i].codigo})">remover</button></td>
         `;
@@ -171,11 +171,16 @@ async function excluirDisciplina(codigo) {
         await fetch(`http://localhost:8080/professores/disciplina/${codigo}`, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
+        }).then(function () {
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === codigo) {
+                    tr.remove();
+                }
+            })
         }).catch(function (err) {
             console.log(err);
         })
-        updateTabela()
-        addDisciplinasTabela(document.getElementById("selectProfessor").value);
         retirar_loading();
     }
 }

@@ -6,25 +6,39 @@ window.onload=function(){
 
     document.getElementById("selectTurma").addEventListener('change', (e) => {
         if (e.currentTarget.value !== "0") {
+            ativar_loading();
             updateTabela();
             carregarDisciplinaTurma(e.currentTarget.value);
+            retirar_loading();
         } else {
             limparCampos()
         }
     })
 
     document.getElementById('modalClose').addEventListener('click', closeModal);
+    retirar_loading();
+}
+
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
+}
+
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
 }
 
 const openModal = () => document.getElementById('modal')
     .classList.add('active');
 
 const closeModal = () => {
+    ativar_loading();
     document.getElementById('modal').classList.remove('active');
     removerElementosModal();
-    deletarTabela();
-    criarTabela();
-    addDisciplinasTabela(document.getElementById("selectTurma").value);
+    retirar_loading();
 }
 
 function carregarTurmas() {
@@ -135,7 +149,7 @@ function adicionarDisciplinasTabela(disciplinas) {
     for (let i=0; i<disciplinas.length; i++) {
         let tr = document.createElement("tr");
         tr.innerHTML = `
-            <td hidden>${disciplinas[i].id}</td>
+            <td hidden>${disciplinas[i].codigo}</td>
             <td>${disciplinas[i].nome}</td>
             <td><button type="button" class="button red" onclick="excluirDisciplina(${disciplinas[i].codigo})">remover</button></td>
         `;
@@ -145,14 +159,21 @@ function adicionarDisciplinasTabela(disciplinas) {
 
 async function excluirDisciplina(codigo) {
     if (window.confirm("Deseja realmente excluir esse registro?") === true) {
+        ativar_loading();
         await fetch(`http://localhost:8080/turmas/disciplina/${codigo}`, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
+        }).then(function () {
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === codigo) {
+                    tr.remove();
+                }
+            })
         }).catch(function (err) {
             console.log(err);
         })
-        updateTabela()
-        addDisciplinasTabela(document.getElementById("selectTurma").value);
+        retirar_loading();
     }
 }
 
@@ -173,7 +194,6 @@ function updateTabela(){
 }
 
 async function addElementosNoModal() {
-
     let disciplinas = await listarDisciplinasSemRelacionamento();
     if (disciplinas.length === 0) {
         let form = document.getElementById("formModal");
@@ -216,14 +236,27 @@ function addElementosNoLabelModal(disciplinas) {
     form.appendChild(botao);
 }
 
+function addUmaDisciplinaNaTabela(disciplina) {
+    let tabela = document.getElementById("tabela");
+    let tr = document.createElement("tr");
+    tr.innerHTML = `
+            <td hidden>${disciplina.codigo}</td>
+            <td>${disciplina.nome}</td>
+            <td><button type="button" class="button red" onclick="excluirDisciplina(${disciplina.codigo})">remover</button></td>
+        `;
+    tabela.appendChild(tr);
+}
+
 function removerElementosModal() {
     let form = document.getElementById("formModal");
     form.innerHTML = "";
 }
 
 function abrirBtnAddDisciplina() {
+    ativar_loading();
     addElementosNoModal();
     openModal();
+    retirar_loading();
 }
 
 async function btnAddDisciplinaNaTurma() {
@@ -232,8 +265,18 @@ async function btnAddDisciplinaNaTurma() {
     if (codigoDisciplina === "0") {
         alert("Selecione uma disciplina disponível");
     } else {
+        ativar_loading();
         let codigoTurma = document.getElementById("selectTurma");
         await adionarDisciplinaNaTurma(codigoDisciplina, codigoTurma.value);
+        retirarElementoModal(codigoDisciplina);
+        retirar_loading();
+    }
+}
+
+async function retirarElementoModal(codigoDisciplina) {
+    let selectDisciplina = document.getElementById("selectDisciplina");
+    selectDisciplina.children[selectDisciplina.selectedIndex].remove();
+    if (selectDisciplina.children.length === 1) {
         removerElementosModal();
         await addElementosNoModal();
     }
@@ -261,6 +304,14 @@ async function adionarDisciplinaNaTurma(codigoDisciplina, codigoTurma) {
         method: "POST",
         body: JSON.stringify(parametros),
         headers: {'Content-Type': 'application/json'}
+    }).then(function () {
+        let selectDisciplina = document.getElementById("selectDisciplina");
+        let option = selectDisciplina.children[selectDisciplina.selectedIndex];
+        let disciplina = {
+            "codigo": codigoDisciplina,
+            "nome": option.label
+        };
+        addUmaDisciplinaNaTabela(disciplina);
     });
     return request;
 }

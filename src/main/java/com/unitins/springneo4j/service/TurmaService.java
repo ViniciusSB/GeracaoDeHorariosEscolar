@@ -22,12 +22,13 @@ public class TurmaService {
 
     }
 
-    public void insert(String nome) {
+    public Turma insert(String nome) {
         Integer codigo = repository.retornarMaiorCodigo();
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", codigo);
         parametros.put("nome", nome);
-        repository.inserir(parametros);
+        Record record = repository.inserir(parametros);
+        return recordToTurma(record);
     }
 
     public Turma descobrirTurmaPelaDisciplina(Long codigoDisciplina) {
@@ -50,11 +51,12 @@ public class TurmaService {
         repository.deletarPorId(parametros);
     }
 
-    public void update(Turma turma) {
+    public Turma update(Turma turma) {
         HashMap<String, Object> parametros = new HashMap<>();
         parametros.put("codigo", turma.getCodigo());
         parametros.put("nome", turma.getNome());
-        repository.atualizar(parametros);
+        Record record = repository.atualizar(parametros);
+        return recordToTurma(record);
     }
 
     public List<Turma> searchByName(String nome) {

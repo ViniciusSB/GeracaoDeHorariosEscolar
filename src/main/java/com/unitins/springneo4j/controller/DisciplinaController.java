@@ -43,12 +43,12 @@ public class DisciplinaController implements WebMvcConfigurer {
     }
 
     @PostMapping()
-    public void cadastrarDisciplina(@RequestBody ObjectNode objectNode) {
+    public Disciplina cadastrarDisciplina(@RequestBody ObjectNode objectNode) {
         Disciplina d = new Disciplina();
         d.setNome(objectNode.get("nome").asText());
         d.setAulaSemanal(objectNode.get("aulasemanal").asInt());
         d.setCargaHoraria(objectNode.get("ch").asInt());
-        service.insert(d);
+        return service.insert(d);
     }
 
     @PostMapping("/disciplinaTurma")

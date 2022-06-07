@@ -18,6 +18,19 @@ window.onload=function(){
     })
 
     updateTabela();
+    retirar_loading();
+}
+
+function ativar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className = "loader";
+    console.log("loader chamado");
+}
+
+function retirar_loading() {
+    let loader = document.getElementById("loader");
+    loader.className += " hidden";
+    console.log("loader retirado");
 }
 
 const openModal = () => document.getElementById('modal')
@@ -61,7 +74,7 @@ function addTurmasTabela(turmas) {
         let tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td hidden>${turmas[i].id}</td>
+            <td hidden>${turmas[i].codigo}</td>
             <td>${turmas[i].nome}</td> 
             <td>
                 <button type="button" class="button green" onclick="javascript:editarRegistro(${turmas[i].codigo})">editar</button>
@@ -95,6 +108,7 @@ function deletarTabela() {
 async function cadastrarTurma() {
     let formModal = document.getElementById("formModal");
     if (formModal.reportValidity()) {
+        ativar_loading();
         let nome = document.getElementById("inputNome");
         let id = document.getElementById("inputId");
         let parametros = {
@@ -102,34 +116,56 @@ async function cadastrarTurma() {
         }
 
         //incluir
-        if (nome.value.length > 0 && id.value == "") {
-            let request = new XMLHttpRequest();
-            request.open("POST", "http://localhost:8080/turmas");
-            request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            request.send(JSON.stringify(parametros));
-            await delay(0.6);
+        if (nome.value.length > 0 && id.value === "") {
+            let request = await fetch("http://localhost:8080/turmas", {
+                method: "POST",
+                mode: "cors",
+                body: nome.value
+            })
+            let response = await request.text();
+            let turma = JSON.parse(response);
+            addUmaTurmaNaTabela(turma);
+            closeModal();
+            retirar_loading();
         } else if (nome.value.length > 0 && id.value != "") { //Atualizar
             parametros.codigo = id.value;
-            fetch(`http://localhost:8080/turmas`, {
+            let request = await fetch(`http://localhost:8080/turmas`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json'},
+                headers: {'Content-Type': 'application/json'},
+                mode: "cors",
                 body: JSON.stringify(parametros)
             });
-            await delay(0.6);
+            let response = await request.text();
+            let professor = JSON.parse(response);
+            //Atualizando o elemento na tabela
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === parseInt(id.value)) {
+                    tr.children[1].textContent = professor.nome;
+                }
+            });
+            closeModal();
+            retirar_loading();
         }
 
-        limparCampos();
-        updateTabela();
-        closeModal();
-        console.log(id.value);
     }
 
 }
 
-function delay(n){
-    return new Promise(function(resolve){
-        setTimeout(resolve,n*1000);
-    });
+function addUmaTurmaNaTabela(turma) {
+    var tabela = document.getElementById("tabela");
+
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+        <td hidden>${turma.codigo}</td>
+        <td>${turma.nome}</td> 
+        <td>
+            <button type="button" class="button green" onclick="javascript:editarRegistro(${turma.codigo})">editar</button>
+            <button type="button" class="button red" onclick="javascript:excluirRegistro(${turma.codigo})">excluir</button>
+        </td>   
+    `;
+    tabela.appendChild(tr);
 }
 
 function updateTabela(){
@@ -139,6 +175,7 @@ function updateTabela(){
 }
 
 function editarRegistro(codigo) {
+    ativar_loading();
     openModal();
     let url = `http://localhost:8080/turmas/${codigo}`;
     fetch(url, {
@@ -154,21 +191,29 @@ function editarRegistro(codigo) {
     }).catch(function (err) {
         console.log(err);
     })
+    retirar_loading();
 }
 
-function excluirRegistro(codigo) {
+async function excluirRegistro(codigo) {
+    ativar_loading();
     var resposta = window.confirm("Deseja realmente excluir esse registro?");
     if (resposta) {
         let url = `http://localhost:8080/turmas/${codigo}`;
-        fetch(url, {
+        let request = await fetch(url, {
             method: "DELETE",
             headers: {'Content-Type': 'application/json'},
         }).then(function (response) {
-            updateTabela();
+            let trs = document.querySelectorAll("#tabela > tr");
+            trs.forEach(tr => {
+                if (parseInt(tr.children[0].textContent) === codigo) {
+                    tr.remove();
+                }
+            })
         }).catch(function (err) {
             console.log(err);
         })
     }
+    retirar_loading();
 }
 
 function pesquisarTurma(campo) {

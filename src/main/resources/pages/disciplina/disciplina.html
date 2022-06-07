@@ -39,16 +39,24 @@
             <a href="../disciplina/disciplina.html">Disciplina</a>
         </li>
         <li>
-            <label for="btn-2" class="show">Professor +</label>
+            <label for="btn-1" class="show">Professor +</label>
             <a href="../professor/professor.html">Professor</a>
-            <input type="checkbox" id="btn-2">
+            <input type="checkbox" id="btn-1">
             <ul>
                 <li><a href="../professor/professor.html">Listar</a></li>
                 <li><a href="../professor/gerenciarDisciplina.html">Gerenciar disciplinas</a></li>
                 <li><a href="../professor/restricaoHorario.html">Gerenciar restrições</a></li>
             </ul>
         </li>
-        <li><a href="../horario/horario.html">Horario</a></li>
+        <li>
+            <label for="btn-2" class="show">Horario +</label>
+            <a href="../horario/horario.html">Horario</a>
+            <input type="checkbox" id="btn-2">
+            <ul>
+                <li><a href="../horario/horario.html">Horario</a></li>
+                <li><a href="../horario/gerarHorario.html">Grade de horarios</a></li>
+            </ul>
+        </li>
     </ul>
 </nav>
 
@@ -59,6 +67,11 @@
 
 <!--    Tabela-->
 <main id="main">
+
+    <div id="loader" class="loader">
+        <img src="../../images/loading.gif"/>
+    </div>
+
     <button type="button" class="button blue mobile" id="cadastrarDisciplina">Cadastrar Disciplina</button>
     <input type="text" id="inputPesquisar" class="inputPesquisa" placeholder="Pesquisar por nome">
     <table class="records" id="tabela">

@@ -129,9 +129,9 @@ function deletarTabela() {
 }
 
 async function cadastrarDisciplina() {
-    ativar_loading();
     let formModal = document.getElementById("formModal");
     if (formModal.reportValidity()) {
+        ativar_loading();
         let nome = document.getElementById("inputNome");
         let ch = document.getElementById("inputCargaHoraria");
         let aulasemanal = document.getElementById("inputAulaSemanal");
